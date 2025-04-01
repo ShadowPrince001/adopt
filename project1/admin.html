@@ -246,10 +246,8 @@
                                 <td>${user.id}</td>
                                 <td>${user.name}</td>
                                 <td>${user.email}</td>
-                                <td>
-                                    ${user.email === 'admin@adoptease.com' 
-                                        ? '<span class="status-badge status-admin">Admin</span>' 
-                                        : '<span class="status-badge status-user">User</span>'}
+                                <td>${user.type}
+                                    
                                 </td>
                                 <td>${formatDate(user.created_at)}</td>
                             </tr>
