@@ -16,8 +16,9 @@ db = SQLAlchemy(app)
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(120), unique=True, nullable=False)
-    password = db.Column(db.String(200), nullable=False)
-    name = db.Column(db.String(100), nullable=False)
+    password = db.Column(db.String(50), nullable=False)
+    name = db.Column(db.String(50), nullable=False)
+    type = db.Column(db.String(50), nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.datetime.utcnow)
     
     def __repr__(self):
@@ -26,18 +27,74 @@ class User(db.Model):
 # Create database tables if they don't exist
 with app.app_context():
     db.create_all()
-    
     # Add a default admin user if none exists
-    admin = User.query.filter_by(email='admin@adoptease.com').first()
+    admin = User.query.filter_by(type='admin').first()
     if not admin:
         admin_user = User(
-            email='admin@adoptease.com',
+            email='maheeyan@gmail.com',
             password=generate_password_hash('admin123'),
-            name='Admin User'
+            name='Maheeyan Saha',
+            type='admin'
         )
         db.session.add(admin_user)
         db.session.commit()
         print('Admin user created successfully')
+
+class Dog(db.Model):
+    __tablename__ = 'dogs'
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), nullable=False)
+    breed = db.Column(db.String(100), nullable=False)
+    age = db.Column(db.Integer, nullable=False)
+    vaccines = db.Column(db.String(200), nullable=True)
+    diseases = db.Column(db.String(200), nullable=True)
+    medical_history = db.Column(db.String(500), nullable=True)
+    personality = db.Column(db.String(200), nullable=True)
+    created_at = db.Column(db.DateTime, default=datetime.datetime.utcnow)
+
+    def __repr__(self):
+        return f'<Dog {self.name}, {self.breed}>'
+
+# Initialize the database
+with app.app_context():
+    db.create_all()
+    dog1 = Dog(
+        name="Buddy",
+        breed="Golden Retriever",
+        age=5,
+        vaccines="Rabies, Parvovirus, Distemper",
+        diseases="None",
+        medical_history="Neutered at 2 years old.",
+        personality="Friendly, Playful, Energetic"
+    )
+    
+    dog2 = Dog(
+        name="Max",
+        breed="German Shepherd",
+        age=3,
+        vaccines="Rabies, Parvovirus",
+        diseases="Hip dysplasia",
+        medical_history="Underwent surgery for hip dysplasia.",
+        personality="Loyal, Protective, Intelligent"
+    )
+
+    dog3 = Dog(
+        name="Bella",
+        breed="Bulldog",
+        age=4,
+        vaccines="Rabies, Bordetella",
+        diseases="None",
+        medical_history="None",
+        personality="Calm, Stubborn, Affectionate"
+    )
+
+    # Add the dogs to the session and commit the changes
+    db.session.add(dog1)
+    db.session.add(dog2)
+    db.session.add(dog3)
+    db.session.commit()
+
+    print("Sample dog data added successfully!")
 
 @app.route('/')
 def index():
@@ -73,7 +130,8 @@ def login():
         {
             'email': user.email,
             'name': user.name,
-            'exp': expiration
+            'exp': expiration,
+            'role': user.type
         },
         app.config['SECRET_KEY']
     )
@@ -81,11 +139,12 @@ def login():
     # In newer versions of PyJWT, token is returned as string
     if isinstance(token, bytes):
         token = token.decode('utf-8')
-    
+
     return jsonify({
         'message': 'Login successful',
         'token': token,
-        'name': user.name
+        'name': user.name,
+        'type': user.type
     })
 
 @app.route('/api/register', methods=['POST'])
@@ -98,9 +157,10 @@ def register():
     email = data.get('email', '')
     password = data.get('password', '')
     name = data.get('name', '')
-    
+    type = data.get('type', '')     
+
     # Validate input
-    if not email or not password or not name:
+    if not email or not password or not name or not type:
         return jsonify({'message': 'All fields are required'}), 400
     
     # Check if user already exists
@@ -110,12 +170,12 @@ def register():
     
     # Create new user
     hashed_password = generate_password_hash(password)
-    new_user = User(email=email, password=hashed_password, name=name)
+    new_user = User(email=email, password=hashed_password, name=name, type=type)
     
     try:
         db.session.add(new_user)
         db.session.commit()
-        return jsonify({'message': 'Registration successful'})
+        return jsonify({'message': 'Registration successful', 'type': type})
     except Exception as e:
         db.session.rollback()
         return jsonify({'message': f'Registration failed: {str(e)}'}), 500
@@ -140,7 +200,8 @@ def verify_token():
             'valid': True,
             'user': {
                 'email': user.email,
-                'name': user.name
+                'name': user.name,
+                'type': user.type
             }
         })
     except jwt.ExpiredSignatureError:
@@ -164,7 +225,7 @@ def get_all_users():
         payload = jwt.decode(token, app.config['SECRET_KEY'], algorithms=['HS256'])
         
         # Check if the user is admin (in a real app, you would have a proper role system)
-        if payload['email'] != 'admin@adoptease.com':
+        if payload['role'] != 'admin':
             return jsonify({'message': 'Unauthorized access'}), 403
         
         # If authorized, return all users
@@ -187,5 +248,5 @@ def get_all_users():
         return jsonify({'message': 'Invalid token'}), 401
 
 if __name__ == '__main__':
-    port = int(os.environ.get('PORT', 5000))
+    port = int(os.environ.get('PORT', 5005))
     app.run(host='0.0.0.0', port=port, debug=True) 

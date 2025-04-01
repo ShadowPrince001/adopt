@@ -137,8 +137,7 @@
     <script>
         document.addEventListener('DOMContentLoaded', async () => {
             // Check if user is authenticated
-            const authToken = localStorage.getItem('authToken');
-            
+            const authToken = localStorage.getItem('authToken');            
             if (!authToken) {
                 // Redirect to login if not authenticated
                 window.location.href = '/index.html';
@@ -161,7 +160,7 @@
                 const userData = await verifyResponse.json();
                 
                 // Simple admin check (in a real app, you would have role-based auth)
-                if (!userData.valid || userData.user.email !== 'admin@adoptease.com') {
+                if (!userData.valid || userData.user.type !== 'admin') {
                     throw new Error('Unauthorized access');
                 }
                 

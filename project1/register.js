@@ -9,13 +9,14 @@ document.addEventListener('DOMContentLoaded', () => {
         const name = document.getElementById('name').value.trim();
         const email = document.getElementById('email').value.trim();
         const password = document.getElementById('password').value;
+        const type = document.getElementById('type').value.trim();
         const terms = document.getElementById('terms').checked;
         
         // Clear previous error messages
         clearErrors();
         
         // Validate form
-        if (!validateForm(name, email, password, terms)) {
+        if (!validateForm(name, email, password, type, terms)) {
             return;
         }
         
@@ -32,7 +33,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ name, email, password })
+                body: JSON.stringify({ name, email, password, type })
             });
             
             const data = await response.json();
@@ -41,9 +42,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 // Registration successful
                 showSuccessMessage('Account created successfully! Redirecting to login...');
                 
-                // Redirect to login page after a short delay
+                let redirectPath = ''
+                if (data.type == "admin") {
+                    redirectPath = "/admin.html"
+                } else if (data.type == "customer") {
+                    redirectPath = "/customer.html"
+                }else if (data.type == "expert") {
+                    redirectPath = "/expert.html"
+                }
                 setTimeout(() => {
-                    window.location.href = '/index.html';
+                    window.location.href = redirectPath;
                 }, 1500);
             } else {
                 // Registration failed
@@ -106,6 +114,12 @@ document.addEventListener('DOMContentLoaded', () => {
             isValid = false;
         } else if (password.length < 8) {
             showErrorMessage('Password must be at least 8 characters long', 'password');
+            isValid = false;
+        }
+
+        // Validate user type
+        if (!type) {
+            showErrorMessage('Type is required', 'type');
             isValid = false;
         }
         

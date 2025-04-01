@@ -44,10 +44,21 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (data.token) {
                     localStorage.setItem('authToken', data.token);
                 }
-                
-                // Redirect to dashboard after a short delay
+
+                console.log("data and toke", data, data.token)
+
+                let redirectPath = ''
+                if (data.type == "admin") {
+                    redirectPath = "/admin.html"
+                } else if (data.type == "customer") {
+                    redirectPath = "/customer.html"
+                }else if (data.type == "expert") {
+                    redirectPath = "/expert.html"
+                }
+
+                console.log("redirecting to", redirectPath)
                 setTimeout(() => {
-                    window.location.href = '/dashboard';
+                    window.location.href = redirectPath;
                 }, 1500);
             } else {
                 // Login failed
