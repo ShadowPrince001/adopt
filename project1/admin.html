@@ -1,139 +1,151 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Panel - Adopt Ease</title>
-    <link rel="stylesheet" href="styles.css">
-    <link rel="stylesheet" href="signup-styles.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <style>
-        .admin-container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 2rem;
-        }
-        
-        .admin-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 2rem;
-            padding-bottom: 1rem;
-            border-bottom: 1px solid #e0e0e0;
-        }
-        
-        .admin-title {
-            font-size: 2rem;
-            font-weight: 700;
-            color: #333;
-            margin-bottom: 1rem;
-        }
-        
-        .admin-subtitle {
-            font-size: 1.5rem;
-            font-weight: 600;
-            color: #333;
-            margin-top: 2rem;
-            margin-bottom: 1rem;
-        }
-        
-        .logout-btn {
-            background-color: #f8f8f8;
-            color: #333;
-            border: 1px solid #e0e0e0;
-            padding: 0.6rem 1rem;
-            border-radius: 4px;
-            cursor: pointer;
-            font-weight: 500;
-            transition: background-color 0.3s;
-        }
-        
-        .logout-btn:hover {
-            background-color: #f0f0f0;
-        }
-        
-        .users-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 1rem;
-            background-color: white;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-            border-radius: 8px;
-            overflow: hidden;
-        }
-        
-        .users-table th,
-        .users-table td {
-            padding: 1rem;
-            text-align: left;
-            border-bottom: 1px solid #e0e0e0;
-        }
-        
-        .users-table th {
-            background-color: #f8f8f8;
-            font-weight: 600;
-            color: #333;
-        }
-        
-        .users-table tr:last-child td {
-            border-bottom: none;
-        }
-        
-        .users-table tr:hover {
-            background-color: #f8f8f8;
-        }
-        
-        .status-badge {
-            display: inline-block;
-            padding: 0.25rem 0.5rem;
-            border-radius: 4px;
-            font-size: 0.8rem;
-            font-weight: 500;
-        }
-        
-        .status-admin {
-            background-color: #ffeeba;
-            color: #856404;
-        }
-        
-        .status-user {
-            background-color: #c3e6cb;
-            color: #155724;
-        }
-        
-        .no-users-message {
-            padding: 2rem;
-            text-align: center;
-            color: #666;
-            background-color: white;
-            border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Admin Panel - AdoptEase</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #e9f5f1;
+    }
+
+    .admin-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 2rem;
+    }
+
+    .admin-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid #d0d0d0;
+    }
+
+    .logo-name-wrapper {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin: 0 auto;
+    }
+
+    .logo {
+      width:70px;
+      height: auto;
+    }
+
+    .company-name {
+      font-size: 3rem;
+      font-weight: 700;
+      color: #222;
+    }
+
+    .admin-title {
+      font-size: 2rem;
+      font-weight: 700;
+      color: #222;
+      margin-bottom: 1rem;
+    }
+
+    .admin-subtitle {
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: #333;
+      margin-top: 2rem;
+      margin-bottom: 1rem;
+    }
+
+    .logout-btn {
+      background-color: #fff;
+      color: #333;
+      border: 1px solid #ccc;
+      padding: 0.6rem 1rem;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 500;
+      transition: background-color 0.3s;
+    }
+
+    .logout-btn:hover {
+      background-color: #f2f2f2;
+    }
+
+    .users-table {
+      width: 100%;
+      border-collapse: collapse;
+      background-color: white;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+
+    .users-table th,
+    .users-table td {
+      padding: 1rem;
+      text-align: left;
+      border-bottom: 1px solid #e0e0e0;
+      white-space: nowrap;
+    }
+
+    .users-table th {
+      background-color: #f0f9f6;
+      font-weight: 600;
+      color: #333;
+    }
+
+    .users-table tr:last-child td {
+      border-bottom: none;
+    }
+    .users-table th:nth-child(1)::after { content: "🆔"; }
+    .users-table th:nth-child(2)::after { content: "👤"; }
+    .users-table th:nth-child(3)::after { content: "📧"; }
+    .users-table th:nth-child(4)::after { content: "⚙️"; }
+    .users-table th:nth-child(5)::after { content: "📅"; }
+    .users-table tr:hover {
+      background-color: #f8f8f8;
+    }
+
+    .no-users-message {
+      padding: 2rem;
+      text-align: center;
+      color: #555;
+      background-color: white;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+  </style>
 </head>
 <body>
-    <div class="admin-container">
-        <div class="admin-header">
-            <div>
-                <div class="logo-container" style="margin: 0;">
-                    <img src="MY_LOGO.PNG" alt="AdoptEase Logo" class="logo" style="width: 60px;">
-                    <div class="company-name" style="font-size: 1.5rem;">AdoptEase</div>
-                </div>
-            </div>
-            
-            <button class="logout-btn" id="logout-btn">Sign Out</button>
-        </div>
-        
-        <div class="admin-title">Admin Panel</div>
-        
-        <div class="admin-subtitle">Registered Users</div>
-        
-        <div id="users-container">
-            <div class="no-users-message">Loading users...</div>
-        </div>
+  <div class="admin-container">
+    <div class="admin-header">
+        <div class="logo-name-wrapper">
+            <img src="MY_LOGO.PNG" alt="AdoptEase Logo" class="logo" />
+            <div class="company-name">AdoptEase</div>
+      </div>
+      <button class="logout-btn" id="logout-btn">Sign Out</button>
     </div>
 
+    <div class="admin-title">Admin Panel</div>
+    <div class="admin-subtitle">Registered Users</div>
+
+    <div id="users-container">
+    
+
+      <div class="no-users-message" id="no-users-msg">Loading users...</div>
+    </div>
+  </div>
+</body>
+</html>
+
+    <script>
+        lucide.createIcons();
+      </script>
     <script>
         document.addEventListener('DOMContentLoaded', async () => {
             
