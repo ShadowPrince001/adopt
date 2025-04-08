@@ -136,16 +136,16 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', async () => {
-            // Check if user is authenticated
+            
             const authToken = localStorage.getItem('authToken');            
             if (!authToken) {
-                // Redirect to login if not authenticated
+                
                 window.location.href = '/index.html';
                 return;
             }
             
             try {
-                // Verify token and check if admin
+                
                 const verifyResponse = await fetch('/api/verify-token', {
                     method: 'GET',
                     headers: {
@@ -159,12 +159,12 @@
                 
                 const userData = await verifyResponse.json();
                 
-                // Simple admin check (in a real app, you would have role-based auth)
+                
                 if (!userData.valid || userData.user.type !== 'admin') {
                     throw new Error('Unauthorized access');
                 }
                 
-                // Fetch users
+                
                 const usersResponse = await fetch('/api/admin/users', {
                     method: 'GET',
                     headers: {
@@ -179,10 +179,10 @@
                 const usersData = await usersResponse.json();
                 
                 if (usersData.users && usersData.users.length > 0) {
-                    // Render users table
+                    
                     renderUsersTable(usersData.users);
                 } else {
-                    // Show no users message
+                   
                     document.getElementById('users-container').innerHTML = `
                         <div class="no-users-message">No users found in the database.</div>
                     `;
@@ -190,7 +190,7 @@
             } catch (error) {
                 console.error('Admin panel error:', error);
                 
-                // Show error message
+                
                 document.getElementById('users-container').innerHTML = `
                     <div class="no-users-message">
                         Error: ${error.message || 'Failed to load users data'}
@@ -199,13 +199,13 @@
                     </div>
                 `;
                 
-                // Clear token for security if unauthorized
+                
                 if (error.message === 'Unauthorized access') {
                     localStorage.removeItem('authToken');
                 }
             }
             
-            // Add logout handler
+            
             document.getElementById('logout-btn').addEventListener('click', () => {
                 localStorage.removeItem('authToken');
                 window.location.href = '/index.html';
@@ -215,7 +215,7 @@
         function renderUsersTable(users) {
             const container = document.getElementById('users-container');
             
-            // Format date helper
+            
             const formatDate = (dateString) => {
                 if (!dateString) return 'N/A';
                 const date = new Date(dateString);
@@ -228,7 +228,7 @@
                 });
             };
             
-            // Create users table
+            
             const tableHtml = `
                 <table class="users-table">
                     <thead>

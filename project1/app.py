@@ -6,13 +6,13 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from flask_sqlalchemy import SQLAlchemy
 
 app = Flask(__name__, static_folder='.')
-app.config['SECRET_KEY'] = 'adopt_ease_secret_key'  # In production, use a secure environment variable
+app.config['SECRET_KEY'] = 'adopt_ease_secret_key'  
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///adoptease.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
 
-# User model for database
+
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(120), unique=True, nullable=False)
@@ -24,10 +24,10 @@ class User(db.Model):
     def __repr__(self):
         return f'<User {self.email}>'
 
-# Create database tables if they don't exist
+
 with app.app_context():
     db.create_all()
-    # Add a default admin user if none exists
+    
     admin = User.query.filter_by(type='admin').first()
     if not admin:
         admin_user = User(
@@ -55,7 +55,7 @@ class Dog(db.Model):
     def __repr__(self):
         return f'<Dog {self.name}, {self.breed}>'
 
-# Initialize the database
+
 with app.app_context():
     db.create_all()
     dog1 = Dog(
@@ -88,7 +88,7 @@ with app.app_context():
         personality="Calm, Stubborn, Affectionate"
     )
 
-    # Add the dogs to the session and commit the changes
+    
     db.session.add(dog1)
     db.session.add(dog2)
     db.session.add(dog3)
@@ -115,7 +115,7 @@ def login():
     password = data.get('password', '')
     remember_me = data.get('rememberMe', False)
     
-    # Validate credentials
+    
     user = User.query.filter_by(email=email).first()
     
     if not user:
@@ -124,7 +124,7 @@ def login():
     if not check_password_hash(user.password, password):
         return jsonify({'message': 'Incorrect password'}), 401
     
-    # Generate JWT token
+    
     expiration = datetime.datetime.utcnow() + datetime.timedelta(days=30 if remember_me else 1)
     token = jwt.encode(
         {
@@ -136,7 +136,7 @@ def login():
         app.config['SECRET_KEY']
     )
     
-    # In newer versions of PyJWT, token is returned as string
+    
     if isinstance(token, bytes):
         token = token.decode('utf-8')
 
@@ -159,16 +159,16 @@ def register():
     name = data.get('name', '')
     type = data.get('type', '')     
 
-    # Validate input
+    
     if not email or not password or not name or not type:
         return jsonify({'message': 'All fields are required'}), 400
     
-    # Check if user already exists
+    
     existing_user = User.query.filter_by(email=email).first()
     if existing_user:
         return jsonify({'message': 'User already exists'}), 409
     
-    # Create new user
+    
     hashed_password = generate_password_hash(password)
     new_user = User(email=email, password=hashed_password, name=name, type=type)
     
@@ -191,7 +191,7 @@ def verify_token():
     
     try:
         payload = jwt.decode(token, app.config['SECRET_KEY'], algorithms=['HS256'])
-        # Check if user still exists in database
+        
         user = User.query.filter_by(email=payload['email']).first()
         if not user:
             return jsonify({'message': 'User no longer exists'}), 401
@@ -209,10 +209,10 @@ def verify_token():
     except jwt.InvalidTokenError:
         return jsonify({'message': 'Invalid token'}), 401
 
-# Admin route to get all users (for demonstration purposes only)
+
 @app.route('/api/admin/users', methods=['GET'])
 def get_all_users():
-    # Get authorization token
+   
     auth_header = request.headers.get('Authorization')
     
     if not auth_header or not auth_header.startswith('Bearer '):
@@ -221,14 +221,14 @@ def get_all_users():
     token = auth_header.split(' ')[1]
     
     try:
-        # Decode the token
+        
         payload = jwt.decode(token, app.config['SECRET_KEY'], algorithms=['HS256'])
         
-        # Check if the user is admin (in a real app, you would have a proper role system)
+        
         if payload['role'] != 'admin':
             return jsonify({'message': 'Unauthorized access'}), 403
         
-        # If authorized, return all users
+        
         users = User.query.all()
         user_list = []
         
