@@ -56,45 +56,7 @@ class Dog(db.Model):
         return f'<Dog {self.name}, {self.breed}>'
 
 
-with app.app_context():
-    db.create_all()
-    dog1 = Dog(
-        name="Buddy",
-        breed="Golden Retriever",
-        age=5,
-        vaccines="Rabies, Parvovirus, Distemper",
-        diseases="None",
-        medical_history="Neutered at 2 years old.",
-        personality="Friendly, Playful, Energetic"
-    )
-    
-    dog2 = Dog(
-        name="Max",
-        breed="German Shepherd",
-        age=3,
-        vaccines="Rabies, Parvovirus",
-        diseases="Hip dysplasia",
-        medical_history="Underwent surgery for hip dysplasia.",
-        personality="Loyal, Protective, Intelligent"
-    )
 
-    dog3 = Dog(
-        name="Bella",
-        breed="Bulldog",
-        age=4,
-        vaccines="Rabies, Bordetella",
-        diseases="None",
-        medical_history="None",
-        personality="Calm, Stubborn, Affectionate"
-    )
-
-    
-    db.session.add(dog1)
-    db.session.add(dog2)
-    db.session.add(dog3)
-    db.session.commit()
-
-    print("Sample dog data added successfully!")
 
 @app.route('/')
 def index():
@@ -292,47 +254,83 @@ def get_all_dogs():
         return jsonify({'message': 'Invalid token'}), 401
 
 @app.route('/api/expert/dogs', methods=['GET'])
-def get_all_dog():
-   
-    auth_header = request.headers.get('Authorization')
-    
-    if not auth_header or not auth_header.startswith('Bearer '):
-        return jsonify({'message': 'Authorization header missing or invalid'}), 401
-    
-    token = auth_header.split(' ')[1]
-    
-    try:
-        
-        payload = jwt.decode(token, app.config['SECRET_KEY'], algorithms=['HS256'])
-        
-        
-        if payload['role'] == 'customer':
-            return jsonify({'message': 'Unauthorized access'}), 403
-        
-        
-        dogs = Dog.query.all()
-        dog_list = []
-        
-        for dog in dogs:
-            dog_data = {
-                'id' : dog.id,
-                'breed' : dog.breed, 
-                'name' : dog.name,
-                'age' : dog.age,
-                'vaccines' : dog.vaccines,
-                'diseases' : dog.diseases,
-               'medical_history' :dog.medical_history,
-                'personality' : dog.personality,
-                'created_at' : dog.created_at
+def get_dogs():
+    dogs = Dog.query.all()
+    dog_list = [
+        {
+            'id': dog.id,
+            'name': dog.name,
+            'breed': dog.breed,
+            'age': dog.age,
+            'vaccines': dog.vaccines,
+            'diseases': dog.diseases,
+            'medical_history': dog.medical_history,
+            'personality': dog.personality
+        } for dog in dogs
+    ]
+    return jsonify({'dogs': dog_list})
 
-            }
-            dog_list.append(dog_data)
-            
-        return jsonify({'dogs': dog_list})
-    except jwt.ExpiredSignatureError:
-        return jsonify({'message': 'Token expired'}), 401
-    except jwt.InvalidTokenError:
-        return jsonify({'message': 'Invalid token'}), 401
+ 
+    
+@app.route('/api/admin/dogs', methods=['POST'])
+def add_dog():
+    data = request.get_json()
+    if not data:
+        return jsonify({'message': 'Invalid data'}), 400
+
+    try:
+        new_dog = Dog(
+            name=data.get('name'),
+            breed=data.get('breed'),
+            age=data.get('age'),
+            vaccines=data.get('vaccines'),
+            diseases=data.get('diseases'),
+            medical_history=data.get('medical_history'),
+            personality=data.get('personality')
+        )
+        db.session.add(new_dog)
+        db.session.commit()
+        return jsonify({'message': 'Dog added successfully'}), 201
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'message': f'Error adding dog: {str(e)}'}), 500
+    
+@app.route('/api/admin/dogs/<int:dog_id>', methods=['PUT'])
+def edit_dog(dog_id):
+    data = request.get_json()
+    dog = Dog.query.get(dog_id)
+    if not dog:
+        return jsonify({'message': 'Dog not found'}), 404
+
+    try:
+        dog.name = data.get('name', dog.name)
+        dog.breed = data.get('breed', dog.breed)
+        dog.age = data.get('age', dog.age)
+        dog.vaccines = data.get('vaccines', dog.vaccines)
+        dog.diseases = data.get('diseases', dog.diseases)
+        dog.medical_history = data.get('medical_history', dog.medical_history)
+        dog.personality = data.get('personality', dog.personality)
+
+        db.session.commit()
+        return jsonify({'message': 'Dog updated successfully'}), 200
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'message': f'Error updating dog: {str(e)}'}), 500
+
+@app.route('/api/admin/dogs/<int:dog_id>', methods=['DELETE'])
+def delete_dog(dog_id):
+    dog = Dog.query.get(dog_id)
+    if not dog:
+        return jsonify({'message': 'Dog not found'}), 404
+
+    try:
+        db.session.delete(dog)
+        db.session.commit()
+        return jsonify({'message': 'Dog deleted successfully'}), 200
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'message': f'Error deleting dog: {str(e)}'}), 500
+
 if __name__ == '__main__':
-    port = int(os.environ.get('PORT', 5007))
+    port = int(os.environ.get('PORT', 5000))
     app.run(host='0.0.0.0', port=port, debug=True) 
