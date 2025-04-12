@@ -2,9 +2,11 @@ AdoptEase - Pet Adoption Website
 Welcome to AdoptEase, a platform designed to make pet adoption easier, more accessible, and more enjoyable for everyone. Whether you're looking for a furry friend to adopt or need some advice, AdoptEase is here to help!
 
 What is AdoptEase?
+
 AdoptEase is a pet adoption website for our adoption center that connects potential pet parents with animals in need of a loving home. We’ve designed a simple and intuitive platform to browse available pets, learn about them, and even get advice on the adoption process.
 
 Key Features
+
 Browse Pets: Easily search and explore a wide range of pets available for adoption. From dogs to cats, find the perfect companion for your family.
 
 Pet Details: Each pet’s profile includes important information, including breed, age,personality and more.
