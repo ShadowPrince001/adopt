@@ -73,6 +73,75 @@
   .logout-btn:hover {
     background-color: #f2f2f2;
   }
+  #chatbot-toggle {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background-color: #1a7f6c;
+  color: white;
+  padding: 10px 15px;
+  border-radius: 30px;
+  cursor: pointer;
+  z-index: 1000;
+  font-weight: 600;
+}
+
+#chatbot-container {
+  display: none;
+  flex-direction: column;
+  width: 320px;
+  height: 420px;
+  position: fixed;
+  bottom: 70px;
+  right: 20px;
+  background-color: white;
+  border-radius: 10px;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+  z-index: 999;
+  overflow: hidden;
+  font-family: 'Inter', sans-serif;
+}
+
+#chatbot-header {
+  background-color: #1a7f6c;
+  color: white;
+  padding: 12px;
+  font-weight: 600;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+#chatbot-messages {
+  flex: 1;
+  padding: 10px;
+  overflow-y: auto;
+  font-size: 0.9rem;
+}
+
+#chatbot-input-area {
+  display: flex;
+  padding: 10px;
+  border-top: 1px solid #ccc;
+}
+
+#chatbot-input {
+  flex: 1;
+  padding: 6px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+}
+
+#chatbot-send {
+  margin-left: 8px;
+  padding: 6px 10px;
+  background-color: #1a7f6c;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
 </style>
 
 </head>
@@ -88,7 +157,7 @@
   <div class="container py-4">
     <h2 class="mb-4 text-center">Customer Dashboard - Registered Dogs</h2>
    
-
+    <div id="total-count">Total Dogs: 0</div>
     <!-- Dogs Table -->
     <div class="table-responsive">
       <table class="table table-hover table-bordered bg-white align-middle">
@@ -107,7 +176,20 @@
       </table>
     </div>
   </div>
+  <div id="chatbot-toggle">AI Chat</div>
 
+  <!-- Chatbot Popup -->
+  <div id="chatbot-container">
+    <div id="chatbot-header">
+      AdoptEase Assistant
+      <span id="chatbot-close">×</span>
+    </div>
+    <div id="chatbot-messages"></div>
+    <div id="chatbot-input-area">
+      <input type="text" id="chatbot-input" placeholder="Ask me anything..." />
+      <button id="chatbot-send">Send</button>
+    </div>
+  </div>
   <!-- JS Scripts -->
   <script>
     const token = localStorage.getItem('token');
@@ -143,7 +225,7 @@
       tbody.innerHTML = '<tr><td colspan="8" class="text-center">No dogs found or error loading data.</td></tr>';
       return;
     }
-
+    document.getElementById("total-count").textContent = `Total Dogs: ${dogs.length}`;
     dogs.forEach(dog => {
       tbody.innerHTML += `
         <tr>
@@ -184,6 +266,34 @@
 
 
     loadDogs();
+    
+  const toggle = document.getElementById('chatbot-toggle');
+  const chatbot = document.getElementById('chatbot-container');
+  const close = document.getElementById('chatbot-close');
+  const send = document.getElementById('chatbot-send');
+  const input = document.getElementById('chatbot-input');
+  const messages = document.getElementById('chatbot-messages');
+
+  toggle.onclick = () => chatbot.style.display = 'flex';
+  close.onclick = () => chatbot.style.display = 'none';
+
+  send.onclick = async () => {
+    const msg = input.value.trim();
+    if (!msg) return;
+    messages.innerHTML += `<div><b>You:</b> ${msg}</div>`;
+    input.value = '';
+
+    const res = await fetch('/chat', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({ message: msg })
+    });
+    const data = await res.json();
+    messages.innerHTML += `<div><b>Bot:</b> ${data.reply}</div>`;
+    messages.scrollTop = messages.scrollHeight;
+  };
+
+
   </script>
 </body>
 </html>

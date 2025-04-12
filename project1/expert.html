@@ -92,8 +92,7 @@
    
     
     <!-- Add Dog Form -->
-   
-
+    <div id="total-count">Total Dogs: 0</div>
     <!-- Dogs Table -->
     <div class="table-responsive">
       <table class="table table-hover table-bordered bg-white align-middle">
@@ -174,7 +173,7 @@
       tbody.innerHTML = '<tr><td colspan="8" class="text-center">No dogs found or error loading data.</td></tr>';
       return;
     }
-
+    document.getElementById("total-count").textContent = `Total Dogs: ${dogs.length}`;
     dogs.forEach(dog => {
       tbody.innerHTML += `
         <tr>

@@ -85,8 +85,9 @@
           </div>
           <button class="logout-btn" id="logout-btn">Back</button>
         </div>
-  <div class="container py-4">
-    <h2 class="mb-4 text-center">🐶 Admin Dashboard - Dogs</h2>
+        <div class="text-center">
+          <h2 class="mb-4">Admin Dashboard - Registered Dogs</h2>
+        </div>
 
     <!-- Add New Dog Button -->
     <div class="d-flex justify-content-end mb-2">
@@ -113,19 +114,20 @@
         </div>
       </div>
     </div>
-
+    <div id="total-count">Total Dogs: 0</div>
     <!-- Dogs Table -->
     <div class="table-responsive">
       <table class="table table-hover table-bordered bg-white align-middle">
         <thead class="table-light">
           <tr>
-            <th>Name</th>
-            <th>Breed</th>
-            <th>Age</th>
-            <th>Vaccines</th>
-            <th>Diseases</th>
-            <th>Medical History</th>
-            <th>Personality</th>
+            <th>ID🆔</th>
+            <th>Name🏷️</th>
+            <th>Breed🐶</th>
+            <th>Age🎂</th>
+            <th>Vaccines💉</th>
+            <th>Diseases✅</th>
+            <th>Medical History🩺</th>
+            <th>Personality🌟</th>
             <th>Actions</th>
           </tr>
         </thead>
@@ -238,10 +240,12 @@
       tbody.innerHTML = '<tr><td colspan="8" class="text-center">No dogs found or error loading data.</td></tr>';
       return;
     }
-
+    document.getElementById("total-count").textContent = `Total Dogs: ${dogs.length}`;
     dogs.forEach(dog => {
       tbody.innerHTML += `
         <tr>
+          <td><input class="form-control" data-id="${dog.id}" data-field="name" value="${dog.id}" readonly></td>
+
           <td><input class="form-control" data-id="${dog.id}" data-field="name" value="${dog.name}"></td>
           <td><input class="form-control" data-id="${dog.id}" data-field="breed" value="${dog.breed}"></td>
           <td><input class="form-control" data-id="${dog.id}" data-field="age" value="${dog.age}"></td>

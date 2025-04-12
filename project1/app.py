@@ -1,10 +1,12 @@
 from flask import Flask, request, jsonify, send_from_directory
 import os
 import jwt
+import requests
 import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_sqlalchemy import SQLAlchemy
-
+from dotenv import load_dotenv
+load_dotenv()
 app = Flask(__name__, static_folder='.')
 app.config['SECRET_KEY'] = 'adopt_ease_secret_key'  
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///adoptease.db'
@@ -331,6 +333,72 @@ def delete_dog(dog_id):
         db.session.rollback()
         return jsonify({'message': f'Error deleting dog: {str(e)}'}), 500
 
+def get_customer_view_dogs():
+    dogs = Dog.query.all()
+    return [
+        {
+            'id': dog.id,
+            'breed': dog.breed,
+            'name': dog.name,
+            'age': dog.age,
+            'personality': dog.personality,
+            'created_at': dog.created_at
+        } for dog in dogs
+    ]
+@app.route('/api/customer/dogs', methods=['GET'])
+def get_all_dog():
+    # (auth checks...)
+    try:
+        dog_list = get_customer_view_dogs()
+        return jsonify({'dogs': dog_list})
+    except:
+        return jsonify({'dogs': []}), 500
+
+@app.route('/chat', methods=['POST'])
+def chat():
+    user_msg = request.json.get('message', '')
+
+    dog_info = get_all_dogs()
+    if isinstance(dog_info, tuple):
+        dog_data = dog_info[0].get_json().get('dogs', [])
+    else:
+        dog_data = dog_info.get_json().get('dogs', [])
+
+    custom_prompt = (
+        "You are a helpful AI assistant on a pet adoption website (AdoptEase). "
+        "Only answer using the given dog data and avoid medical advice.\n"
+        f"Here is the list of dogs:\n{dog_data}\n"
+    )
+
+    payload = {
+        "model": "deepseek-chat",
+        "messages": [
+            {"role": "system", "content": custom_prompt},
+            {"role": "user", "content": user_msg}
+        ]
+    }
+
+    headers = {
+        "Authorization": f"Bearer {os.getenv('DEEPSEEK_API_KEY')}",  # uses .env value
+        "Content-Type": "application/json"
+    }
+
+    res = requests.post("https://api.deepseek.com/v1/chat/completions", json=payload, headers=headers)
+
+    try:
+        if res.status_code == 402:  # Insufficient balance error
+            return jsonify({"reply": "Sorry, our AI service is currently unavailable due to insufficient balance. Please try again later."}), 402
+        
+        print("Status:", res.status_code)
+        print("Response:", res.text)
+
+        reply = res.json()["choices"][0]["message"]["content"]
+    except (KeyError, IndexError):
+        reply = "Sorry, something went wrong with the AI response."
+
+    return jsonify({"reply": reply})
+
+   
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
     app.run(host='0.0.0.0', port=port, debug=True) 
