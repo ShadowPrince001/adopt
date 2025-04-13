@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Admin Dogs</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    /* Global styles */
+    body {
+      font-family: 'Inter', sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #e9f5f1;
+    }
+
+    /* Container styles */
+    .admin-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 2rem;
+    }
+
+    /* Header styles */
+    .admin-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid #d0d0d0;
+    }
+
+    .logo-name-wrapper {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin: 0 auto;
+    }
+
+    .logo {
+      width: 70px;
+      height: auto;
+    }
+
+    .company-name {
+      font-size: 3rem;
+      font-weight: 700;
+      color: #222;
+    }
+
+    /* Button styles */
+    .logout-btn {
+      background-color: #fff;
+      color: #333;
+      border: 1px solid #ccc;
+      padding: 0.6rem 1rem;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 500;
+      transition: background-color 0.3s;
+    }
+
+    .logout-btn:hover {
+      background-color: #f2f2f2;
+    }
+
+    /* Filter section styles */
+    .filter-section {
+      margin-bottom: 20px;
+      padding: 15px;
+      background-color: #f8f9fa;
+      border-radius: 8px;
+    }
+
+    /* Table styles */
+    .table-responsive {
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      margin: 0 -2rem;
+      padding: 0 2rem;
+    }
+
+    .table {
+      font-size: 0.9rem;
+      min-width: 1200px;
+      width: 100%;
+    }
+
+    .table th, .table td {
+      padding: 0.5rem;
+      vertical-align: middle;
+      white-space: nowrap;
+    }
+
+    /* Form control styles */
+    .form-control {
+      font-size: 0.9rem;
+      padding: 0.25rem 0.5rem;
+      width: 100%;
+    }
+
+    /* Column width definitions */
+    th:nth-child(1), td:nth-child(1) { width: 60px; } /* ID */
+    th:nth-child(2), td:nth-child(2) { width: 120px; } /* Name */
+    th:nth-child(3), td:nth-child(3) { width: 120px; } /* Breed */
+    th:nth-child(4), td:nth-child(4) { width: 80px; } /* Age */
+    th:nth-child(5), td:nth-child(5) { width: 100px; } /* Color */
+    th:nth-child(6), td:nth-child(6) { width: 100px; } /* Height */
+    th:nth-child(7), td:nth-child(7) { width: 100px; } /* Weight */
+    th:nth-child(8), td:nth-child(8) { width: 150px; } /* Vaccines */
+    th:nth-child(9), td:nth-child(9) { width: 150px; } /* Diseases */
+    th:nth-child(10), td:nth-child(10) { min-width: 200px; } /* Medical History */
+    th:nth-child(11), td:nth-child(11) { min-width: 150px; } /* Personality */
+    th:nth-child(12), td:nth-child(12) { width: 100px; } /* Actions */
+  </style>
+
+</head>
+
+<body>
+  <!-- Main container -->
+  <div class="admin-container">
+    <!-- Header section with logo and back button -->
+    <div class="admin-header">
+      <div class="logo-name-wrapper">
+        <img src="MY_LOGO.PNG" alt="AdoptEase Logo" class="logo" />
+        <div class="company-name">AdoptEase</div>
+      </div>
+      <button class="logout-btn" id="logout-btn">Back</button>
+    </div>
+
+    <!-- Page title -->
+    <div class="text-center">
+      <h2 class="mb-4">Admin Dashboard - Registered Dogs</h2>
+    </div>
+
+    <!-- Filter section -->
+    <div class="filter-section">
+      <div class="row">
+        <div class="col-md-4">
+          <label for="breedFilter" class="form-label">Filter by Breed:</label>
+          <select class="form-select" id="breedFilter">
+            <option value="">All Breeds</option>
+          </select>
+        </div>
+        <div class="col-md-4">
+          <label for="sortBy" class="form-label">Sort by:</label>
+          <select class="form-select" id="sortBy">
+            <option value="age_desc">Age (Oldest First)</option>
+            <option value="age_asc">Age (Youngest First)</option>
+            <option value="created_desc">Registration Date (Newest First)</option>
+            <option value="created_asc">Registration Date (Oldest First)</option>
+            <option value="name_asc">Name (A-Z)</option>
+            <option value="name_desc">Name (Z-A)</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- Add new dog button -->
+    <div class="d-flex justify-content-end mb-2">
+      <button class="btn btn-primary" onclick="showAddForm()">➕ Add New Dog</button>
+    </div>
+
+    <!-- Add dog form (hidden by default) -->
+    <div id="addDogForm" style="display: none;" class="border rounded p-3 mb-4 bg-white">
+      <h5 class="mb-3">Add New Dog</h5>
+      <div class="row g-2">
+        <div class="col-md-2"><input type="text" class="form-control" placeholder="Name" id="addName"></div>
+        <div class="col-md-2"><input type="text" class="form-control" placeholder="Breed" id="addBreed"></div>
+        <div class="col-md-1"><input type="number" min="0" max="35" class="form-control" placeholder="Age" id="addAge"></div>
+        <div class="col-md-2"><input type="text" class="form-control" placeholder="Color" id="addColor"></div>
+        <div class="col-md-2"><input type="number" step="0.1" min="7.5" max="150" class="form-control" placeholder="Height (cm)" id="addHeight"></div>
+        <div class="col-md-2"><input type="number" step="0.1" min="0.25" max="200" class="form-control" placeholder="Weight (kg)" id="addWeight"></div>
+        <div class="col-md-2"><input type="text" class="form-control" placeholder="Vaccines" id="addVaccines"></div>
+        <div class="col-md-2"><input type="text" class="form-control" placeholder="Diseases" id="addDiseases"></div>
+        <div class="col-md-12 mt-2">
+          <input type="text" class="form-control" placeholder="Medical History" id="addMedicalHistory">
+        </div>
+        <div class="col-md-12 mt-2">
+          <input type="text" class="form-control" placeholder="Personality" id="addPersonality">
+        </div>
+        <div class="col-md-12 mt-3">
+          <button class="btn btn-success me-2" onclick="submitNewDog()">Submit</button>
+          <button class="btn btn-secondary" onclick="hideAddForm()">Cancel</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Total dogs count -->
+    <div id="total-count">Total Dogs: 0</div>
+
+    <!-- Dogs table -->
+    <div class="table-responsive">
+      <table class="table table-hover table-bordered bg-white align-middle">
+        <thead class="table-light">
+          <tr>
+            <th>ID🆔</th>
+            <th>Name🏷️</th>
+            <th>Breed🐶</th>
+            <th>Age🎂</th>
+            <th>Color🎨</th>
+            <th>Height📏</th>
+            <th>Weight⚖️</th>
+            <th>Vaccines💉</th>
+            <th>Diseases✅</th>
+            <th>Medical History🩺</th>
+            <th>Personality🌟</th>
+            <th>Registration Date</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="dogTableBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- JavaScript code -->
+  <script>
+    // Authentication and Security
+    // Check if user is authenticated by verifying token in localStorage
+    // If no token exists, redirect to login page
+    const token = localStorage.getItem('authToken');
+    if (!token) {
+      window.location.href = '/index.html';
+    }
+
+    // Global State Management
+    // Store all dogs data fetched from server
+    let dogs = [];
+    // Store unique breeds for filter dropdown
+    let breeds = new Set();
+
+    /**
+     * Form Visibility Management
+     * Shows the add dog form by changing its display style to block
+     * This function is called when the "Add New Dog" button is clicked
+     */
+    function showAddForm() {
+      document.getElementById('addDogForm').style.display = 'block';
+    }
+
+    /**
+     * Form Visibility Management
+     * Hides the add dog form by changing its display style to none
+     * This function is called when the "Cancel" button is clicked
+     */
+    function hideAddForm() {
+      document.getElementById('addDogForm').style.display = 'none';
+    }
+
+    /**
+     * Data Submission and Validation
+     * Handles the submission of a new dog to the server
+     * Steps:
+     * 1. Get and validate input values
+     * 2. Perform frontend validation
+     * 3. Prepare data for submission
+     * 4. Send POST request to server
+     * 5. Handle response and update UI
+     */
+    function submitNewDog() {
+      // Step 1: Get and validate input values
+      const age = parseInt(document.getElementById('addAge').value);
+      const height = parseFloat(document.getElementById('addHeight').value);
+      const weight = parseFloat(document.getElementById('addWeight').value);
+
+      // Step 2: Frontend validation
+      // Validate age range (0-35 years)
+      if (age < 0 || age > 35) {
+        alert('Age must be between 0 and 35 years');
+        return;
+      }
+      // Validate height range (7.5-150 cm)
+      if (height < 7.5 || height > 150) {
+        alert('Height must be between 7.5cm and 150cm');
+        return;
+      }
+      // Validate weight range (0.25-200 kg)
+      if (weight < 0.25 || weight > 200) {
+        alert('Weight must be between 0.25kg and 200kg');
+        return;
+      }
+
+      // Step 3: Prepare data for submission
+      const data = {
+        name: document.getElementById('addName').value,
+        breed: document.getElementById('addBreed').value,
+        age: age,
+        color: document.getElementById('addColor').value,
+        height: height,
+        weight: weight,
+        vaccines: document.getElementById('addVaccines').value,
+        diseases: document.getElementById('addDiseases').value,
+        medical_history: document.getElementById('addMedicalHistory').value,
+        personality: document.getElementById('addPersonality').value
+      };
+
+      // Step 4: Send POST request to server
+      fetch('/api/admin/dogs', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(data)
+      })
+        .then(res => res.json())
+        .then(res => {
+          // Step 5: Handle response and update UI
+          if (res.message) {
+            alert(res.message);
+            hideAddForm();
+            loadDogs(); // Refresh the table
+          } else {
+            throw new Error('Failed to add dog');
+          }
+        })
+        .catch(err => {
+          console.error('Error adding dog:', err);
+          alert(err.message || 'Failed to add dog. Please check your input values.');
+        });
+    }
+
+    /**
+     * Data Deletion
+     * Handles the deletion of a dog from the database
+     * Steps:
+     * 1. Confirm deletion with user
+     * 2. Send DELETE request to server
+     * 3. Handle response and update UI
+     * @param {number} id - The ID of the dog to delete
+     */
+    function deleteDog(id) {
+      // Step 1: Confirm deletion with user
+      if (confirm("Are you sure you want to delete this dog?")) {
+        // Step 2: Send DELETE request to server
+        fetch(`/api/admin/dogs/${id}`, {
+          method: 'DELETE',
+          headers: { 'Authorization': `Bearer ${token}` }
+        })
+          .then(res => res.json())
+          .then(res => {
+            // Step 3: Handle response and update UI
+            alert(res.message);
+            loadDogs(); // Refresh the table
+          })
+          .catch(err => {
+            console.error('Error deleting dog:', err);
+            alert('Failed to delete dog.');
+          });
+      }
+    }
+
+    /**
+     * Data Update
+     * Handles updating dog information in the database
+     * Steps:
+     * 1. Collect updated data from input fields
+     * 2. Show loading state
+     * 3. Send PUT request to server
+     * 4. Handle response and update UI
+     * @param {number} id - The ID of the dog to update
+     */
+    function updateDog(id) {
+      // Step 1: Collect updated data from input fields
+      const inputs = document.querySelectorAll(`[data-id="${id}"]`);
+      const updatedData = {};
+      inputs.forEach(input => {
+        updatedData[input.dataset.field] = input.value;
+      });
+
+      // Step 2: Show loading state
+      const saveButton = document.querySelector(`button[onclick="updateDog(${id})"]`);
+      const originalText = saveButton.textContent;
+      saveButton.textContent = 'Saving...';
+      saveButton.disabled = true;
+
+      // Step 3: Send PUT request to server
+      fetch(`/api/admin/dogs/${id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(updatedData)
+      })
+        .then(res => {
+          if (!res.ok) {
+            return res.json().then(data => {
+              throw new Error(data.message || 'Failed to update dog');
+            });
+          }
+          return res.json();
+        })
+        .then(res => {
+          // Step 4: Handle response and update UI
+          console.log('Update successful:', res);
+          loadDogs(); // Refresh the table
+          alert('Dog information updated successfully');
+        })
+        .catch(err => {
+          console.error('Error updating dog:', err);
+          alert(err.message || 'Failed to update dog. Please check your input values.');
+        })
+        .finally(() => {
+          // Restore button state
+          saveButton.textContent = originalText;
+          saveButton.disabled = false;
+        });
+    }
+
+    /**
+     * Data Loading and Display
+     * Loads dogs data from the server and displays it in the table
+     * Steps:
+     * 1. Show loading state
+     * 2. Fetch data from server
+     * 3. Process and validate data
+     * 4. Update UI with fetched data
+     */
+    function loadDogs() {
+      // Step 1: Show loading state
+      document.getElementById('dogTableBody').innerHTML = '<tr><td colspan="13" class="text-center">Loading dogs...</td></tr>';
+      
+      // Step 2: Fetch data from server
+      fetch('/api/admin/dogs', {
+        headers: { Authorization: `Bearer ${token}` }
+      })
+        .then(res => {
+          if (!res.ok) {
+            return res.json().then(data => {
+              throw new Error(data.message || 'Failed to fetch dogs');
+            });
+          }
+          return res.json();
+        })
+        .then(data => {
+          // Step 3: Process and validate data
+          console.log('Fetched dogs:', data);
+          dogs = data.dogs || [];
+
+          if (!Array.isArray(dogs) || dogs.length === 0) {
+            document.getElementById('dogTableBody').innerHTML = '<tr><td colspan="13" class="text-center">No dogs found.</td></tr>';
+            document.getElementById("total-count").textContent = 'Total Dogs: 0';
+            return;
+          }
+
+          // Step 4: Update UI with fetched data
+          document.getElementById("total-count").textContent = `Total Dogs: ${dogs.length}`;
+          breeds = new Set(dogs.map(dog => dog.breed));
+          updateBreedFilter();
+          filterAndDisplayDogs();
+        })
+        .catch(err => {
+          console.error('Error fetching dogs:', err);
+          document.getElementById('dogTableBody').innerHTML = 
+            `<tr><td colspan="13" class="text-center text-danger">Error: ${err.message}. Please try refreshing the page.</td></tr>`;
+        });
+    }
+
+    /**
+     * Filter Management
+     * Updates the breed filter dropdown with available breeds
+     * Steps:
+     * 1. Clear existing options
+     * 2. Add "All Breeds" option
+     * 3. Add sorted breed options
+     */
+    function updateBreedFilter() {
+      const breedFilter = document.getElementById('breedFilter');
+      // Step 1: Clear existing options
+      breedFilter.innerHTML = '<option value="">All Breeds</option>';
+      // Steps 2 & 3: Add sorted breed options
+      [...breeds].sort().forEach(breed => {
+        breedFilter.innerHTML += `<option value="${breed}">${breed}</option>`;
+      });
+    }
+
+    /**
+     * Data Filtering and Sorting
+     * Filters and sorts dogs based on selected criteria
+     * Steps:
+     * 1. Get filter and sort criteria
+     * 2. Filter dogs by breed
+     * 3. Sort dogs based on selected criteria
+     * 4. Display filtered and sorted dogs
+     */
+    function filterAndDisplayDogs() {
+      // Step 1: Get filter and sort criteria
+      const breed = document.getElementById('breedFilter').value;
+      const sortBy = document.getElementById('sortBy').value;
+
+      // Step 2: Filter dogs by breed
+      let filteredDogs = dogs.filter(dog => {
+        if (!breed) return true;
+        return dog.breed === breed;
+      });
+
+      // Step 3: Sort dogs based on selected criteria
+      filteredDogs.sort((a, b) => {
+        switch (sortBy) {
+          case 'age_desc':
+            return b.age - a.age;
+          case 'age_asc':
+            return a.age - b.age;
+          case 'created_desc':
+            return new Date(b.created_at) - new Date(a.created_at);
+          case 'created_asc':
+            return new Date(a.created_at) - new Date(b.created_at);
+          case 'name_asc':
+            return a.name.localeCompare(b.name);
+          case 'name_desc':
+            return b.name.localeCompare(a.name);
+          default:
+            return 0;
+        }
+      });
+
+      // Step 4: Display filtered and sorted dogs
+      const tbody = document.getElementById('dogTableBody');
+      tbody.innerHTML = '';
+      filteredDogs.forEach(dog => {
+        const date = new Date(dog.created_at).toLocaleDateString();
+        tbody.innerHTML += `
+          <tr>
+            <td><input class="form-control" data-id="${dog.id}" data-field="name" value="${dog.id}" readonly></td>
+            <td><input class="form-control" data-id="${dog.id}" data-field="name" value="${dog.name}"></td>
+            <td><input class="form-control" data-id="${dog.id}" data-field="breed" value="${dog.breed}"></td>
+            <td><input class="form-control" data-id="${dog.id}" data-field="age" type="number" min="0" max="35" value="${dog.age}"></td>
+            <td><input class="form-control" data-id="${dog.id}" data-field="color" value="${dog.color || ''}" placeholder="Enter color"></td>
+            <td><input class="form-control" data-id="${dog.id}" data-field="height" type="number" step="0.1" min="7.5" max="150" value="${dog.height || ''}" placeholder="Height (cm)"></td>
+            <td><input class="form-control" data-id="${dog.id}" data-field="weight" type="number" step="0.1" min="0.25" max="200" value="${dog.weight || ''}" placeholder="Weight (kg)"></td>
+            <td><input class="form-control" data-id="${dog.id}" data-field="vaccines" value="${dog.vaccines || ''}"></td>
+            <td><input class="form-control" data-id="${dog.id}" data-field="diseases" value="${dog.diseases || ''}"></td>
+            <td><input class="form-control" data-id="${dog.id}" data-field="medical_history" value="${dog.medical_history || ''}"></td>
+            <td><input class="form-control" data-id="${dog.id}" data-field="personality" value="${dog.personality || ''}"></td>
+            <td>${date}</td>
+            <td>
+              <button class="btn btn-success btn-sm me-1" onclick="updateDog(${dog.id})">✔</button>
+              <button class="btn btn-danger btn-sm" onclick="deleteDog(${dog.id})">🗑</button>
+            </td>
+          </tr>
+        `;
+      });
+    }
+
+    // Event Listeners
+    // Add change event listeners for filters
+    document.getElementById('breedFilter').addEventListener('change', filterAndDisplayDogs);
+    document.getElementById('sortBy').addEventListener('change', filterAndDisplayDogs);
+    // Add click event listener for back button
+    document.getElementById('logout-btn').addEventListener('click', () => {
+      window.location.href = '/admin.html';
+    });
+
+    // Initialization
+    // Load dogs data when page loads
+    loadDogs();
+  </script>
+</body>
+
+</html>

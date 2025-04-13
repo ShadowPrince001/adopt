@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up - Adopt Ease</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <div class="signup-container">
+        <div class="signup-form-container">
+            <div class="signup-form-content">
+                <div class="logo-container">
+                    <img src="MY_LOGO.PNG" alt="AdoptEase Logo" class="logo">
+                    <div class="company-name">AdoptEase</div>
+                    <div class="tagline">Find.Adopt.Love.</div>
+                </div>
+                <h1 class="signup-title">Get Started Now</h1>
+
+                <form id="signup-form">
+                    <div class="form-group">
+                        <label for="name">Name</label>
+                        <input type="text" id="name" name="name" placeholder="Enter your name" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="email">Email address</label>
+                        <input type="email" id="email" name="email" placeholder="Enter your email" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="password">Password</label>
+                        <input type="password" id="password" name="password" placeholder="••••••••" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="type">Account Type</label>
+                        <select id="type" name="type" required>
+                            <option value="customer">Customer</option>
+                            <option value="expert">Pet Expert</option>
+                        </select>
+                    </div>
+
+                    <div class="terms-checkbox">
+                        <input type="checkbox" id="terms" name="terms" required>
+                        <label for="terms">I agree to the <a href="#" class="terms-link">terms & policy</a></label>
+                    </div>
+
+                    <button type="submit" class="signup-btn">Sign Up</button>
+                </form>
+
+                <div class="login-link">
+                    Have an account? <a href="index.html">Sign In</a>
+                </div>
+            </div>
+        </div>
+        <div class="image-container">
+            <!-- Background image will be set in CSS -->
+        </div>
+    </div>
+
+    <script src="register.js"></script>
+</body>
+
+</html>
