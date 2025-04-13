@@ -152,7 +152,7 @@
                 <img src="MY_LOGO.PNG" alt="AdoptEase Logo" class="logo" />
                 <div class="company-name">AdoptEase</div>
           </div>
-          <button class="logout-btn" id="logout-btn">Back</button>
+          <button class="logout-btn" id="logout-btn">Sign Out</button>
         </div>
   <div class="container py-4">
     <h2 class="mb-4 text-center">Customer Dashboard - Registered Dogs</h2>
@@ -167,7 +167,9 @@
             <th>Name🏷️</th>
             <th>Breed🐶</th>
             <th>Age🎂</th>
-            
+            <th>Vaccines💉</th>
+            <th>Diseases✅</th>
+            <th>Medical History🩺</th>
             <th>Personality🌟</th>
            
           </tr>
@@ -233,6 +235,9 @@
           <td><input class="form-control" data-id="${dog.id}" data-field="name" value="${dog.name}" readonly></td>
           <td><input class="form-control" data-id="${dog.id}" data-field="breed" value="${dog.breed}" readonly></td>
           <td><input class="form-control" data-id="${dog.id}" data-field="age" value="${dog.age}"readonly></td>
+          <td><input class="form-control" data-id="${dog.id}" data-field="vaccines" value="${dog.vaccines || ''}"readonly></td>
+          <td><input class="form-control" data-id="${dog.id}" data-field="diseases" value="${dog.diseases || ''}"readonly></td>
+          <td><input class="form-control" data-id="${dog.id}" data-field="medical_history" value="${dog.medical_history || ''}"readonly></td>
           <td><input class="form-control" data-id="${dog.id}" data-field="personality" value="${dog.personality || ''}"readonly></td>
           
         </tr>

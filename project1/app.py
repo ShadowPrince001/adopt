@@ -213,66 +213,9 @@ def get_all_users():
         return jsonify({'message': 'Invalid token'}), 401
 
 
-@app.route('/api/customer/dogs', methods=['GET'])
-def get_all_dogs():
-   
-    auth_header = request.headers.get('Authorization')
-    
-    if not auth_header or not auth_header.startswith('Bearer '):
-        return jsonify({'message': 'Authorization header missing or invalid'}), 401
-    
-    token = auth_header.split(' ')[1]
-    
-    try:
-        
-        payload = jwt.decode(token, app.config['SECRET_KEY'], algorithms=['HS256'])
-        
-        
-        if payload['role'] == 'expert':
-            return jsonify({'message': 'Unauthorized access'}), 403
-        
-        
-        dogs = Dog.query.all()
-        dog_list = []
-        
-        for dog in dogs:
-            dog_data = {
-                'id' : dog.id,
-                'breed' : dog.breed, 
-                'name' : dog.name,
-                'age' : dog.age,
-                
-               
-                'personality' : dog.personality,
-                'created_at' : dog.created_at
 
-            }
-            dog_list.append(dog_data)
-            
-        return jsonify({'dogs': dog_list})
-    except jwt.ExpiredSignatureError:
-        return jsonify({'message': 'Token expired'}), 401
-    except jwt.InvalidTokenError:
-        return jsonify({'message': 'Invalid token'}), 401
 
-@app.route('/api/expert/dogs', methods=['GET'])
-def get_dogs():
-    dogs = Dog.query.all()
-    dog_list = [
-        {
-            'id': dog.id,
-            'name': dog.name,
-            'breed': dog.breed,
-            'age': dog.age,
-            'vaccines': dog.vaccines,
-            'diseases': dog.diseases,
-            'medical_history': dog.medical_history,
-            'personality': dog.personality
-        } for dog in dogs
-    ]
-    return jsonify({'dogs': dog_list})
 
- 
     
 @app.route('/api/admin/dogs', methods=['POST'])
 def add_dog():
@@ -333,7 +276,28 @@ def delete_dog(dog_id):
         db.session.rollback()
         return jsonify({'message': f'Error deleting dog: {str(e)}'}), 500
 
+@app.route('/api/expert/dogs', methods=['GET'])
+def get_dogs():
+    
+    
+    
+        dogs = Dog.query.all()
+        dog_list = [
+            {
+                'id': dog.id,
+                'name': dog.name,
+                'breed': dog.breed,
+                'age': dog.age,
+                'vaccines': dog.vaccines,
+                'diseases': dog.diseases,
+                'medical_history': dog.medical_history,
+                'personality': dog.personality
+            } for dog in dogs
+        ]
+        return jsonify({'dogs': dog_list})
+    
 def get_customer_view_dogs():
+    
     dogs = Dog.query.all()
     return [
         {
@@ -358,7 +322,7 @@ def get_all_dog():
 def chat():
     user_msg = request.json.get('message', '')
 
-    dog_info = get_all_dogs()
+    dog_info = get_all_dog()
     if isinstance(dog_info, tuple):
         dog_data = dog_info[0].get_json().get('dogs', [])
     else:
