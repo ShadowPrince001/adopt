@@ -22,7 +22,7 @@ Flask: The heart of the backend. This Python-based web framework makes sure ever
 
 HTML/CSS/JavaScript: For the website’s front-end. We focused on making it clean, simple, and easy to use, with a modern look and feel.
 
-DeepSeek API: Used for powering the AI chatbot, which answers all your adoption-related questions and gives suggestions on pets.
+OpenRouter API: Used for powering the AI chatbot, which answers all your adoption-related questions and gives suggestions on pets.
 
 GitHub & Git: For managing the code and ensuring smooth collaboration.
 
