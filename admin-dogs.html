@@ -367,7 +367,10 @@
       const inputs = document.querySelectorAll(`[data-id="${id}"]`);
       const updatedData = {};
       inputs.forEach(input => {
-        updatedData[input.dataset.field] = input.value;
+        const value = input.value.trim();
+        if (value !== '') {
+          updatedData[input.dataset.field] = value;
+        }
       });
 
       // Step 2: Show loading state

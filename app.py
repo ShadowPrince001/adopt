@@ -224,6 +224,9 @@ def get_admin_dogs():
                 "name": dog.name,
                 "breed": dog.breed,
                 "age": dog.age,
+                "color": dog.color,
+                "height": dog.height,
+                "weight": dog.weight,
                 "vaccines": dog.vaccines,
                 "diseases": dog.diseases,
                 "medical_history": dog.medical_history,
@@ -346,7 +349,6 @@ def delete_dog(dog_id):
 
 @app.route("/api/expert/dogs", methods=["GET"])
 def get_dogs():
-
     dogs = Dog.query.all()
     dog_list = [
         {
@@ -354,6 +356,9 @@ def get_dogs():
             "name": dog.name,
             "breed": dog.breed,
             "age": dog.age,
+            "color": dog.color,
+            "height": dog.height,
+            "weight": dog.weight,
             "vaccines": dog.vaccines,
             "diseases": dog.diseases,
             "medical_history": dog.medical_history,
@@ -372,6 +377,9 @@ def get_customer_view_dogs():
             "breed": dog.breed,
             "name": dog.name,
             "age": dog.age,
+            "color": dog.color,
+            "height": dog.height,
+            "weight": dog.weight,
             "vaccines": dog.vaccines,
             "diseases": dog.diseases,
             "medical_history": dog.medical_history,
@@ -475,7 +483,7 @@ def update_expert_dog(dog_id):
         if not dog:
             return jsonify({"message": "Dog not found"}), 404
 
-        # Experts can only update medical-related fields
+        # Experts can update medical-related fields and physical attributes
         if "vaccines" in data:
             dog.vaccines = data["vaccines"]
         if "diseases" in data:
@@ -484,9 +492,23 @@ def update_expert_dog(dog_id):
             dog.medical_history = data["medical_history"]
         if "personality" in data:
             dog.personality = data["personality"]
+        if "color" in data:
+            dog.color = data["color"]
+        if "height" in data:
+            height = float(data["height"])
+            if height < 7.5 or height > 150:
+                return jsonify({"message": "Height must be between 7.5cm and 150cm"}), 400
+            dog.height = height
+        if "weight" in data:
+            weight = float(data["weight"])
+            if weight < 0.25 or weight > 200:
+                return jsonify({"message": "Weight must be between 0.25kg and 200kg"}), 400
+            dog.weight = weight
 
         db.session.commit()
         return jsonify({"message": "Dog updated successfully"}), 200
+    except ValueError as e:
+        return jsonify({"message": "Height and weight must be valid numbers"}), 400
     except Exception as e:
         db.session.rollback()
         return jsonify({"message": str(e)}), 500
