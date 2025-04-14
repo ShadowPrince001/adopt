@@ -206,6 +206,7 @@
           
           // Skip empty values for optional fields
           if (value === '' && ['color', 'vaccines', 'diseases', 'medical_history', 'personality'].includes(field)) {
+            updatedData[field] = null;
             return;
           }
           
@@ -242,7 +243,7 @@
         saveButton.textContent = 'Saving...';
         saveButton.disabled = true;
 
-        fetch(`/api/dogs/${id}`, {
+        fetch(`/api/expert/dogs/${id}`, {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
