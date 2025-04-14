@@ -2,10 +2,14 @@
 <html lang="en">
 
 <head>
-  <meta charset="UTF-8">
-  <title>Expert Dashboard</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Expert Dashboard - AdoptEase</title>
+  <!-- External Resources -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <style>
+    /* Base Styles */
     body {
       font-family: 'Inter', sans-serif;
       margin: 0;
@@ -13,12 +17,15 @@
       background-color: #e9f5f1;
     }
 
+    /* Container Styles */
     .expert-container {
       max-width: 1200px;
       margin: 0 auto;
       padding: 2rem;
+      background-color: #e9f5f1;
     }
 
+    /* Header Styles */
     .expert-header {
       display: flex;
       justify-content: space-between;
@@ -46,21 +53,7 @@
       color: #222;
     }
 
-    .expert-title {
-      font-size: 2rem;
-      font-weight: 700;
-      color: #222;
-      margin-bottom: 1rem;
-    }
-
-    .expert-subtitle {
-      font-size: 1.5rem;
-      font-weight: 600;
-      color: #333;
-      margin-top: 2rem;
-      margin-bottom: 1rem;
-    }
-
+    /* Button Styles */
     .logout-btn {
       background-color: #fff;
       color: #333;
@@ -76,56 +69,75 @@
       background-color: #f2f2f2;
     }
 
-    /* Table styles */
-    .table-responsive {
-      overflow-x: auto;
-      -webkit-overflow-scrolling: touch;
-      margin: 0 -2rem;
-      padding: 0 2rem;
-    }
-
+    /* Table Styles */
     .table {
-      font-size: 0.9rem;
-      min-width: 1200px;
-      width: 100%;
+      width: auto;
+      margin-bottom: 1rem;
+      background-color: white;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
     }
 
     .table th, .table td {
-      padding: 0.5rem;
+      text-align: center !important;
       vertical-align: middle;
+      padding: 1rem;
+      border-bottom: 1px solid #e0e0e0;
+    }
+
+    .table th {
+      background-color: #f0f9f6;
+      font-weight: 600;
+      color: #333;
       white-space: nowrap;
     }
 
-    .form-control {
-      text-align: center;
-      font-size: 0.9rem;
-      padding: 0.25rem 0.5rem;
+    .table td {
+      white-space: nowrap;
+    }
+
+    /* Column Widths - Set to minimum required space */
+    .table th:nth-child(1), .table td:nth-child(1) { min-width: 50px; } /* ID */
+    .table th:nth-child(2), .table td:nth-child(2) { min-width: 120px; } /* Name */
+    .table th:nth-child(3), .table td:nth-child(3) { min-width: 160px; } /* Breed */
+    .table th:nth-child(4), .table td:nth-child(4) { min-width: 80px; } /* Age */
+    .table th:nth-child(5), .table td:nth-child(5) { min-width: 150px; } /* Color */
+    .table th:nth-child(6), .table td:nth-child(6) { min-width: 100px; } /* Height */
+    .table th:nth-child(7), .table td:nth-child(7) { min-width: 100px; } /* Weight */
+    .table th:nth-child(8), .table td:nth-child(8) { min-width: 250px; } /* Vaccines */
+    .table th:nth-child(9), .table td:nth-child(9) { min-width: 150px; } /* Diseases */
+    .table th:nth-child(10), .table td:nth-child(10) { min-width: 200px; } /* Medical History */
+    .table th:nth-child(11), .table td:nth-child(11) { min-width: 200px; } /* Personality */
+    .table th:nth-child(12), .table td:nth-child(12) { min-width: 100px; } /* Actions */
+
+    .table tr:hover {
+      background-color: #f8f8f8;
+    }
+
+    .table-responsive {
+      border-radius: 12px;
+      overflow: hidden;
+      display: inline-block;
       width: 100%;
     }
 
-    /* Remove fixed widths and let content determine width */
-    .table th, .table td {
+    /* Message and Filter Section Styles */
+    .no-users-message {
+      padding: 2rem;
       text-align: center;
-      
+      color: #555;
+      background-color: white;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     }
 
-    /* Specific columns that need more width */
-    .table th:nth-child(10), .table td:nth-child(10) { min-width: 200px; } /* Medical History */
-    .table th:nth-child(11), .table td:nth-child(11) { min-width: 200px; } /* Personality */
-    .table th:nth-child(8), td:nth-child(8) { min-width: 250px; } /* Vaccines */
-    .table th:nth-child(9), td:nth-child(9) { min-width: 150px; } /* Diseases */
-
-    /* Specific column widths */
-    th:nth-child(1), td:nth-child(1) { width: 60px; } /* ID */
-    th:nth-child(2), td:nth-child(2) { width: 120px; } /* Name */
-    th:nth-child(3), td:nth-child(3) { width: 120px; } /* Breed */
-    th:nth-child(4), td:nth-child(4) { width: 80px; } /* Age */
-    th:nth-child(5), td:nth-child(5) { width: 100px; } /* Color */
-    th:nth-child(6), td:nth-child(6) { width: 100px; } /* Height */
-    th:nth-child(7), td:nth-child(7) { width: 100px; } /* Weight */
-    
-    
-    th:nth-child(12), td:nth-child(12) { width: 100px; } /* Actions */
+    .filter-section {
+      margin-bottom: 20px;
+      padding: 15px;
+      background-color: #f8f9fa;
+      border-radius: 8px;
+    }
   </style>
 
 </head>
