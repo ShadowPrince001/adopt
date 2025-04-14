@@ -178,17 +178,27 @@
     <!-- Filter section -->
     <div class="filter-section">
       <div class="row">
-        <div class="col-md-4">
+        <div class="col-md-3">
           <label for="breedFilter" class="form-label">Filter by Breed:</label>
           <select class="form-select" id="breedFilter">
             <option value="">All Breeds</option>
           </select>
         </div>
-        <div class="col-md-4">
+        <div class="col-md-3">
+          <label for="colorFilter" class="form-label">Filter by Color:</label>
+          <select class="form-select" id="colorFilter">
+            <option value="">All Colors</option>
+          </select>
+        </div>
+        <div class="col-md-3">
           <label for="sortBy" class="form-label">Sort by:</label>
           <select class="form-select" id="sortBy">
             <option value="age_desc">Age (Oldest First)</option>
             <option value="age_asc">Age (Youngest First)</option>
+            <option value="height_desc">Height (Tallest First)</option>
+            <option value="height_asc">Height (Shortest First)</option>
+            <option value="weight_desc">Weight (Heaviest First)</option>
+            <option value="weight_asc">Weight (Lightest First)</option>
             <option value="created_desc">Registration Date (Newest First)</option>
             <option value="created_asc">Registration Date (Oldest First)</option>
             <option value="name_asc">Name (A-Z)</option>
@@ -271,6 +281,8 @@
     let dogs = [];
     // Store unique breeds for filter dropdown
     let breeds = new Set();
+    // Store unique colors for filter dropdown
+    let colors = new Set();
 
     /**
      * Form Visibility Management
@@ -539,7 +551,8 @@
           // Step 4: Update UI with fetched data
           document.getElementById("total-count").textContent = `Total Dogs: ${dogs.length}`;
           breeds = new Set(dogs.map(dog => dog.breed));
-          updateBreedFilter();
+          colors = new Set(dogs.map(dog => dog.color).filter(color => color));
+          updateFilters();
           filterAndDisplayDogs();
         })
         .catch(err => {
@@ -551,49 +564,54 @@
 
     /**
      * Filter Management
-     * Updates the breed filter dropdown with available breeds
-     * Steps:
-     * 1. Clear existing options
-     * 2. Add "All Breeds" option
-     * 3. Add sorted breed options
+     * Updates the breed and color filter dropdowns with available options
      */
-    function updateBreedFilter() {
+    function updateFilters() {
       const breedFilter = document.getElementById('breedFilter');
-      // Step 1: Clear existing options
+      const colorFilter = document.getElementById('colorFilter');
+      
+      // Update breed filter
       breedFilter.innerHTML = '<option value="">All Breeds</option>';
-      // Steps 2 & 3: Add sorted breed options
       [...breeds].sort().forEach(breed => {
         breedFilter.innerHTML += `<option value="${breed}">${breed}</option>`;
+      });
+
+      // Update color filter
+      colorFilter.innerHTML = '<option value="">All Colors</option>';
+      [...colors].sort().forEach(color => {
+        colorFilter.innerHTML += `<option value="${color}">${color}</option>`;
       });
     }
 
     /**
      * Data Filtering and Sorting
      * Filters and sorts dogs based on selected criteria
-     * Steps:
-     * 1. Get filter and sort criteria
-     * 2. Filter dogs by breed
-     * 3. Sort dogs based on selected criteria
-     * 4. Display filtered and sorted dogs
      */
     function filterAndDisplayDogs() {
-      // Step 1: Get filter and sort criteria
       const breed = document.getElementById('breedFilter').value;
+      const color = document.getElementById('colorFilter').value;
       const sortBy = document.getElementById('sortBy').value;
 
-      // Step 2: Filter dogs by breed
       let filteredDogs = dogs.filter(dog => {
-        if (!breed) return true;
-        return dog.breed === breed;
+        const breedMatch = !breed || dog.breed === breed;
+        const colorMatch = !color || (dog.color && dog.color.toLowerCase() === color.toLowerCase());
+        return breedMatch && colorMatch;
       });
 
-      // Step 3: Sort dogs based on selected criteria
       filteredDogs.sort((a, b) => {
         switch (sortBy) {
           case 'age_desc':
             return b.age - a.age;
           case 'age_asc':
             return a.age - b.age;
+          case 'height_desc':
+            return (b.height || 0) - (a.height || 0);
+          case 'height_asc':
+            return (a.height || 0) - (b.height || 0);
+          case 'weight_desc':
+            return (b.weight || 0) - (a.weight || 0);
+          case 'weight_asc':
+            return (a.weight || 0) - (b.weight || 0);
           case 'created_desc':
             return new Date(b.created_at) - new Date(a.created_at);
           case 'created_asc':
@@ -636,8 +654,8 @@
     }
 
     // Event Listeners
-    // Add change event listeners for filters
     document.getElementById('breedFilter').addEventListener('change', filterAndDisplayDogs);
+    document.getElementById('colorFilter').addEventListener('change', filterAndDisplayDogs);
     document.getElementById('sortBy').addEventListener('change', filterAndDisplayDogs);
     // Add click event listener for back button
     document.getElementById('logout-btn').addEventListener('click', () => {

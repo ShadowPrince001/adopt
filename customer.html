@@ -273,6 +273,40 @@
     <div class="container py-4">
       <h2 class="mb-4 text-center">Customer Dashboard - Registered Dogs</h2>
 
+      <!-- Filter section -->
+      <div class="filter-section">
+        <div class="row">
+          <div class="col-md-3">
+            <label for="breedFilter" class="form-label">Filter by Breed:</label>
+            <select class="form-select" id="breedFilter">
+              <option value="">All Breeds</option>
+            </select>
+          </div>
+          <div class="col-md-3">
+            <label for="colorFilter" class="form-label">Filter by Color:</label>
+            <select class="form-select" id="colorFilter">
+              <option value="">All Colors</option>
+            </select>
+          </div>
+          <div class="col-md-3">
+            <label for="sortBy" class="form-label">Sort by:</label>
+            <select class="form-select" id="sortBy">
+              <option value="age_desc">Age (Oldest First)</option>
+              <option value="age_asc">Age (Youngest First)</option>
+              <option value="height_desc">Height (Tallest First)</option>
+              <option value="height_asc">Height (Shortest First)</option>
+              <option value="weight_desc">Weight (Heaviest First)</option>
+              <option value="weight_asc">Weight (Lightest First)</option>
+              <option value="created_desc">Registration Date (Newest First)</option>
+              <option value="created_asc">Registration Date (Oldest First)</option>
+              <option value="name_asc">Name (A-Z)</option>
+              <option value="name_desc">Name (Z-A)</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Total dogs count -->
       <div id="total-count">Total Dogs: 0</div>
       <!-- Dogs Table -->
       <div class="table-responsive">
@@ -290,6 +324,8 @@
               <th>Diseases✅</th>
               <th>Medical History🩺</th>
               <th>Personality🌟</th>
+              <th>Registration Date📅</th>
+              <th>Actions👇</th>
             </tr>
           </thead>
           <tbody id="dogTableBody"></tbody>
@@ -317,111 +353,155 @@
         window.location.href = '/index.html';
       }
 
-      function loadDogs() {
-        const tbody = document.getElementById('dogTableBody');
-        tbody.innerHTML = '<tr><td colspan="8" class="text-center">Loading dogs...</td></tr>';
+      // Global State Management
+      // Store all dogs data fetched from server
+      let dogs = [];
+      // Store unique breeds for filter dropdown
+      let breeds = new Set();
+      // Store unique colors for filter dropdown
+      let colors = new Set();
 
-        fetch('/api/customer/dogs', {
-          headers: { 
-            Authorization: `Bearer ${token}`,
-            'Content-Type': 'application/json'
+      /**
+       * Filter Management
+       * Updates the breed and color filter dropdowns with available options
+       */
+      function updateFilters() {
+        const breedFilter = document.getElementById('breedFilter');
+        const colorFilter = document.getElementById('colorFilter');
+        
+        // Update breed filter
+        breedFilter.innerHTML = '<option value="">All Breeds</option>';
+        [...breeds].sort().forEach(breed => {
+          breedFilter.innerHTML += `<option value="${breed}">${breed}</option>`;
+        });
+
+        // Update color filter
+        colorFilter.innerHTML = '<option value="">All Colors</option>';
+        [...colors].sort().forEach(color => {
+          colorFilter.innerHTML += `<option value="${color}">${color}</option>`;
+        });
+      }
+
+      /**
+       * Data Filtering and Sorting
+       * Filters and sorts dogs based on selected criteria
+       */
+      function filterAndDisplayDogs() {
+        const breed = document.getElementById('breedFilter').value;
+        const color = document.getElementById('colorFilter').value;
+        const sortBy = document.getElementById('sortBy').value;
+
+        let filteredDogs = dogs.filter(dog => {
+          const breedMatch = !breed || dog.breed === breed;
+          const colorMatch = !color || (dog.color && dog.color.toLowerCase() === color.toLowerCase());
+          return breedMatch && colorMatch;
+        });
+
+        filteredDogs.sort((a, b) => {
+          switch (sortBy) {
+            case 'age_desc':
+              return b.age - a.age;
+            case 'age_asc':
+              return a.age - b.age;
+            case 'height_desc':
+              return (b.height || 0) - (a.height || 0);
+            case 'height_asc':
+              return (a.height || 0) - (b.height || 0);
+            case 'weight_desc':
+              return (b.weight || 0) - (a.weight || 0);
+            case 'weight_asc':
+              return (a.weight || 0) - (b.weight || 0);
+            case 'created_desc':
+              return new Date(b.created_at) - new Date(a.created_at);
+            case 'created_asc':
+              return new Date(a.created_at) - new Date(b.created_at);
+            case 'name_asc':
+              return a.name.localeCompare(b.name);
+            case 'name_desc':
+              return b.name.localeCompare(a.name);
+            default:
+              return 0;
           }
+        });
+
+        const tbody = document.getElementById('dogTableBody');
+        tbody.innerHTML = '';
+        filteredDogs.forEach(dog => {
+          const date = new Date(dog.created_at).toLocaleDateString();
+          tbody.innerHTML += `
+            <tr>
+              <td>${dog.id}</td>
+              <td>${dog.name}</td>
+              <td>${dog.breed}</td>
+              <td>${dog.age}</td>
+              <td>${dog.color || 'N/A'}</td>
+              <td>${dog.height || 'N/A'} cm</td>
+              <td>${dog.weight || 'N/A'} kg</td>
+              <td>${dog.vaccines || 'N/A'}</td>
+              <td>${dog.diseases || 'N/A'}</td>
+              <td>${dog.medical_history || 'N/A'}</td>
+              <td>${dog.personality || 'N/A'}</td>
+              <td>${date}</td>
+              <td>
+                <button class="btn btn-primary btn-sm" onclick="startChat(${dog.id})">Chat</button>
+              </td>
+            </tr>
+          `;
+        });
+      }
+
+      /**
+       * Data Loading and Display
+       * Loads dogs data from the server and displays it in the table
+       */
+      function loadDogs() {
+        document.getElementById('dogTableBody').innerHTML = '<tr><td colspan="13" class="text-center">Loading dogs...</td></tr>';
+        
+        fetch('/api/customer/dogs', {
+          headers: { Authorization: `Bearer ${token}` }
         })
           .then(res => {
-            if (res.status === 401) {
-              throw new Error('Unauthorized access. Please log in again.');
-            }
-            if (res.status === 403) {
-              throw new Error('You do not have permission to view dogs.');
-            }
             if (!res.ok) {
-              throw new Error(`Server error: ${res.status}`);
+              return res.json().then(data => {
+                throw new Error(data.message || 'Failed to fetch dogs');
+              });
             }
             return res.json();
           })
           .then(data => {
-            tbody.innerHTML = '';
+            console.log('Fetched dogs:', data);
+            dogs = data.dogs || [];
 
-            if (!data || typeof data !== 'object') {
-              console.error('Invalid data format received:', data);
-              throw new Error('Invalid data format received from server');
-            }
-
-            const dogs = data.dogs || [];
-
-            if (!Array.isArray(dogs)) {
-              console.error('Dogs data is not an array:', dogs);
-              throw new Error('Invalid dogs data format');
-            }
-
-            if (dogs.length === 0) {
-              tbody.innerHTML = '<tr><td colspan="8" class="text-center">No dogs found in the system.</td></tr>';
+            if (!Array.isArray(dogs) || dogs.length === 0) {
+              document.getElementById('dogTableBody').innerHTML = '<tr><td colspan="13" class="text-center">No dogs found.</td></tr>';
               document.getElementById("total-count").textContent = 'Total Dogs: 0';
               return;
             }
-            
-            document.getElementById("total-count").textContent = `Total Dogs: ${dogs.length}`;
-            dogs.forEach(dog => {
-              // Validate each dog object
-              if (!dog || typeof dog !== 'object') {
-                console.warn('Invalid dog entry:', dog);
-                return;
-              }
 
-              tbody.innerHTML += `
-                <tr>
-                  <td>${dog.id || 'N/A'}</td>
-                  <td>${dog.name || 'N/A'}</td>
-                  <td>${dog.breed || 'N/A'}</td>
-                  <td>${dog.age || 'N/A'}</td>
-                  <td>${dog.color ? dog.color : '<span class="text-muted">Not specified</span>'}</td>
-                  <td>${dog.height ? `${dog.height} cm` : '<span class="text-muted">Not specified</span>'}</td>
-                  <td>${dog.weight ? `${dog.weight} kg` : '<span class="text-muted">Not specified</span>'}</td>
-                  <td>${formatField(dog.vaccines)}</td>
-                  <td>${formatField(dog.diseases)}</td>
-                  <td>${formatField(dog.medical_history)}</td>
-                  <td>${formatField(dog.personality)}</td>
-                </tr>
-              `;
-            });
+            document.getElementById("total-count").textContent = `Total Dogs: ${dogs.length}`;
+            breeds = new Set(dogs.map(dog => dog.breed));
+            colors = new Set(dogs.map(dog => dog.color).filter(color => color));
+            updateFilters();
+            filterAndDisplayDogs();
           })
           .catch(err => {
-            console.error('Error in loadDogs:', {
-              message: err.message,
-              stack: err.stack,
-              timestamp: new Date().toISOString()
-            });
-
-            let errorMessage = 'An error occurred while loading dogs.';
-            if (err.message.includes('Unauthorized')) {
-              errorMessage = 'Your session has expired. Please log in again.';
-              setTimeout(() => {
-                localStorage.removeItem('authToken');
-                window.location.href = '/index.html';
-              }, 2000);
-            } else if (err.message.includes('permission')) {
-              errorMessage = 'You do not have permission to view this information.';
-            } else if (err.message.includes('Invalid data format')) {
-              errorMessage = 'There was a problem with the data format. Please try again later.';
-            }
-
-            tbody.innerHTML = `
-              <tr>
-                <td colspan="8" class="text-center text-danger">
-                  ${errorMessage}
-                  <br>
-                  <small>If this problem persists, please contact support.</small>
-                </td>
-              </tr>
-            `;
-            document.getElementById("total-count").textContent = 'Total Dogs: -';
+            console.error('Error fetching dogs:', err);
+            document.getElementById('dogTableBody').innerHTML = 
+              `<tr><td colspan="13" class="text-center text-danger">Error: ${err.message}. Please try refreshing the page.</td></tr>`;
           });
       }
 
-      function formatField(value) {
-        if (!value) return '<span class="text-muted">None</span>';
-        return value.toString().trim() || '<span class="text-muted">None</span>';
-      }
+      // Event Listeners
+      document.getElementById('breedFilter').addEventListener('change', filterAndDisplayDogs);
+      document.getElementById('colorFilter').addEventListener('change', filterAndDisplayDogs);
+      document.getElementById('sortBy').addEventListener('change', filterAndDisplayDogs);
+      document.getElementById('logout-btn').addEventListener('click', () => {
+        localStorage.removeItem('authToken');
+        window.location.href = '/index.html';
+      });
+
+      // Initialization
+      loadDogs();
 
       // Initialize chatbot
       document.getElementById('chatbot-toggle').addEventListener('click', () => {
@@ -561,15 +641,6 @@
         }
       `;
       document.head.appendChild(style);
-
-      // Load dogs on page load
-      loadDogs();
-
-      // Handle logout
-      document.getElementById('logout-btn').addEventListener('click', () => {
-        localStorage.removeItem('authToken');
-        window.location.href = '/index.html';
-      });
     </script>
 </body>
 
