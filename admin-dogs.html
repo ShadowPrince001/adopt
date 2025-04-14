@@ -302,39 +302,53 @@
      */
     function submitNewDog() {
       // Step 1: Get and validate input values
+      const name = document.getElementById('addName').value.trim();
+      const breed = document.getElementById('addBreed').value.trim();
       const age = parseInt(document.getElementById('addAge').value);
+      const color = document.getElementById('addColor').value.trim();
       const height = parseFloat(document.getElementById('addHeight').value);
       const weight = parseFloat(document.getElementById('addWeight').value);
+      const vaccines = document.getElementById('addVaccines').value.trim();
+      const diseases = document.getElementById('addDiseases').value.trim();
+      const medicalHistory = document.getElementById('addMedicalHistory').value.trim();
+      const personality = document.getElementById('addPersonality').value.trim();
 
       // Step 2: Frontend validation
-      // Validate age range (0-35 years)
-      if (age < 0 || age > 35) {
+      if (!name || !breed) {
+        alert('Name and breed are required fields');
+        return;
+      }
+
+      // Validate age
+      if (isNaN(age) || age < 0 || age > 35) {
         alert('Age must be between 0 and 35 years');
         return;
       }
-      // Validate height range (7.5-150 cm)
-      if (height < 7.5 || height > 150) {
+
+      // Validate height
+      if (isNaN(height) || height < 7.5 || height > 150) {
         alert('Height must be between 7.5cm and 150cm');
         return;
       }
-      // Validate weight range (0.25-200 kg)
-      if (weight < 0.25 || weight > 200) {
+
+      // Validate weight
+      if (isNaN(weight) || weight < 0.25 || weight > 200) {
         alert('Weight must be between 0.25kg and 200kg');
         return;
       }
 
       // Step 3: Prepare data for submission
       const data = {
-        name: document.getElementById('addName').value,
-        breed: document.getElementById('addBreed').value,
+        name: name,
+        breed: breed,
         age: age,
-        color: document.getElementById('addColor').value,
+        color: color || null,
         height: height,
         weight: weight,
-        vaccines: document.getElementById('addVaccines').value,
-        diseases: document.getElementById('addDiseases').value,
-        medical_history: document.getElementById('addMedicalHistory').value,
-        personality: document.getElementById('addPersonality').value
+        vaccines: vaccines || null,
+        diseases: diseases || null,
+        medical_history: medicalHistory || null,
+        personality: personality || null
       };
 
       // Step 4: Send POST request to server
@@ -346,16 +360,19 @@
         },
         body: JSON.stringify(data)
       })
-        .then(res => res.json())
+        .then(res => {
+          if (!res.ok) {
+            return res.json().then(data => {
+              throw new Error(data.message || 'Failed to add dog');
+            });
+          }
+          return res.json();
+        })
         .then(res => {
           // Step 5: Handle response and update UI
-          if (res.message) {
-            alert(res.message);
-            hideAddForm();
-            loadDogs(); // Refresh the table
-          } else {
-            throw new Error('Failed to add dog');
-          }
+          alert('Dog added successfully');
+          hideAddForm();
+          loadDogs(); // Refresh the table
         })
         .catch(err => {
           console.error('Error adding dog:', err);

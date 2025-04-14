@@ -201,30 +201,39 @@
         const inputs = document.querySelectorAll(`[data-id="${id}"]`);
         const updatedData = {};
         inputs.forEach(input => {
-          updatedData[input.dataset.field] = input.value;
+          const value = input.value.trim();
+          const field = input.dataset.field;
+          
+          // Skip empty values for optional fields
+          if (value === '' && ['color', 'vaccines', 'diseases', 'medical_history', 'personality'].includes(field)) {
+            return;
+          }
+          
+          // Convert numeric fields
+          if (['age', 'height', 'weight'].includes(field)) {
+            const numValue = parseFloat(value);
+            if (isNaN(numValue)) {
+              alert(`Invalid ${field} value`);
+              return;
+            }
+            updatedData[field] = numValue;
+          } else {
+            updatedData[field] = value;
+          }
         });
 
-        // Frontend validation
-        if (updatedData.age) {
-          const age = parseInt(updatedData.age);
-          if (age < 0 || age > 35) {
-            alert('Age must be between 0 and 35 years');
-            return;
-          }
+        // Validate numeric fields
+        if (updatedData.age !== undefined && (updatedData.age < 0 || updatedData.age > 30)) {
+          alert('Age must be between 0 and 30 years');
+          return;
         }
-        if (updatedData.height) {
-          const height = parseFloat(updatedData.height);
-          if (height < 7.5 || height > 150) {
-            alert('Height must be between 7.5cm and 150cm');
-            return;
-          }
+        if (updatedData.height !== undefined && (updatedData.height <= 0 || updatedData.height > 200)) {
+          alert('Height must be between 0 and 200 cm');
+          return;
         }
-        if (updatedData.weight) {
-          const weight = parseFloat(updatedData.weight);
-          if (weight < 0.25 || weight > 200) {
-            alert('Weight must be between 0.25kg and 200kg');
-            return;
-          }
+        if (updatedData.weight !== undefined && (updatedData.weight <= 0 || updatedData.weight > 100)) {
+          alert('Weight must be between 0 and 100 kg');
+          return;
         }
 
         // Show loading state
@@ -233,7 +242,7 @@
         saveButton.textContent = 'Saving...';
         saveButton.disabled = true;
 
-        fetch(`/api/expert/dogs/${id}`, {
+        fetch(`/api/dogs/${id}`, {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
@@ -251,9 +260,7 @@
           })
           .then(res => {
             console.log('Update successful:', res);
-            // Reload the table data
-            loadDogs();
-            // Show success message
+            loadDogs(); // Refresh the table
             alert('Dog information updated successfully');
           })
           .catch(err => {
@@ -272,7 +279,7 @@
         const tbody = document.getElementById('dogTableBody');
         tbody.innerHTML = '<tr><td colspan="12" class="text-center">Loading dogs...</td></tr>';
 
-        fetch('/api/expert/dogs', {
+        fetch('/api/dogs', {
           headers: { Authorization: `Bearer ${token}` }
         })
           .then(res => {
