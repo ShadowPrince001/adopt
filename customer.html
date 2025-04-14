@@ -109,6 +109,7 @@
     .table th:nth-child(9), .table td:nth-child(9) { min-width: 150px; } /* Diseases */
     .table th:nth-child(10), .table td:nth-child(10) { min-width: 200px; } /* Medical History */
     .table th:nth-child(11), .table td:nth-child(11) { min-width: 200px; } /* Personality */
+    .table th:nth-child(12), .table td:nth-child(12) { min-width: 100px; } /* Actions */
 
     .table tr:hover {
       background-color: #f8f8f8;
@@ -116,9 +117,10 @@
 
     .table-responsive {
       border-radius: 12px;
-      overflow: hidden;
-      display: inline-block;
+      overflow-x: auto;
       width: 100%;
+      margin-bottom: 1rem;
+      -webkit-overflow-scrolling: touch;
     }
 
     /* Message and Filter Section Styles */

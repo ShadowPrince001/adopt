@@ -70,7 +70,7 @@
 
     /* Table Styles */
     .table {
-      width: auto;
+      width: 100%;
       margin-bottom: 1rem;
       background-color: white;
       border-radius: 12px;
@@ -96,13 +96,13 @@
       white-space: nowrap;
     }
 
-    /* Column Widths - Set to minimum required space */
-    .table th:nth-child(1), .table td:nth-child(1) { min-width: 50px; } /* ID */
-    .table th:nth-child(2), .table td:nth-child(2) { min-width: 120px; } /* Name */
-    .table th:nth-child(3), .table td:nth-child(3) { min-width: 180px; } /* Email */
-    .table th:nth-child(4), .table td:nth-child(4) { min-width: 80px; } /* Type */
-    .table th:nth-child(5), .table td:nth-child(5) { min-width: 120px; } /* Registration Date */
-    .table th:nth-child(6), .table td:nth-child(6) { min-width: 100px; } /* Actions */
+    /* Column Widths - Adjusted to fit screen */
+    .table th:nth-child(1), .table td:nth-child(1) { width: 5%; } /* ID */
+    .table th:nth-child(2), .table td:nth-child(2) { width: 15%; } /* Name */
+    .table th:nth-child(3), .table td:nth-child(3) { width: 30%; } /* Email */
+    .table th:nth-child(4), .table td:nth-child(4) { width: 10%; } /* Type */
+    .table th:nth-child(5), .table td:nth-child(5) { width: 20%; } /* Registration Date */
+    .table th:nth-child(6), .table td:nth-child(6) { width: 20%; } /* Actions */
 
     .table tr:hover {
       background-color: #f8f8f8;
@@ -110,9 +110,9 @@
 
     .table-responsive {
       border-radius: 12px;
-      overflow: hidden;
-      display: inline-block;
+      overflow-x: auto;
       width: 100%;
+      margin-bottom: 1rem;
     }
 
     /* Message and Filter Section Styles */
