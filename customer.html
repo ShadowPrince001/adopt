@@ -208,11 +208,12 @@
 
     /* Remove fixed widths and let content determine width */
     .table th, .table td {
-      min-width: 100px;
+      text-align: center;
+      min-width: 50px;
     }
 
     /* Specific columns that need more width */
-    .table th:nth-child(10), .table td:nth-child(10) { min-width: 200px; } /* Medical History */
+    .table th:nth-child(10), .table td:nth-child(10) { min-width: 150px; } /* Medical History */
     .table th:nth-child(11), .table td:nth-child(11) { min-width: 150px; } /* Personality */
   </style>
 
@@ -241,8 +242,8 @@
               <th>Breed🐶</th>
               <th>Age🎂</th>
               <th>Color🎨</th>
-              <th>Height📏</th>
-              <th>Weight⚖️</th>
+              <th>Height(cm)📏</th>
+              <th>Weight(kg)⚖️</th>
               <th>Vaccines💉</th>
               <th>Diseases✅</th>
               <th>Medical History🩺</th>

@@ -97,6 +97,7 @@
     }
 
     .form-control {
+      text-align: center;
       font-size: 0.9rem;
       padding: 0.25rem 0.5rem;
       width: 100%;
@@ -104,12 +105,15 @@
 
     /* Remove fixed widths and let content determine width */
     .table th, .table td {
-      min-width: 100px;
+      text-align: center;
+      
     }
 
     /* Specific columns that need more width */
     .table th:nth-child(10), .table td:nth-child(10) { min-width: 200px; } /* Medical History */
-    .table th:nth-child(11), .table td:nth-child(11) { min-width: 150px; } /* Personality */
+    .table th:nth-child(11), .table td:nth-child(11) { min-width: 200px; } /* Personality */
+    .table th:nth-child(8), td:nth-child(8) { min-width: 250px; } /* Vaccines */
+    .table th:nth-child(9), td:nth-child(9) { min-width: 150px; } /* Diseases */
 
     /* Specific column widths */
     th:nth-child(1), td:nth-child(1) { width: 60px; } /* ID */
@@ -119,8 +123,8 @@
     th:nth-child(5), td:nth-child(5) { width: 100px; } /* Color */
     th:nth-child(6), td:nth-child(6) { width: 100px; } /* Height */
     th:nth-child(7), td:nth-child(7) { width: 100px; } /* Weight */
-    th:nth-child(8), td:nth-child(8) { width: 150px; } /* Vaccines */
-    th:nth-child(9), td:nth-child(9) { width: 150px; } /* Diseases */
+    
+    
     th:nth-child(12), td:nth-child(12) { width: 100px; } /* Actions */
   </style>
 
@@ -153,8 +157,8 @@
               <th>Breed🐶</th>
               <th style="min-width: 80px;">Age🎂</th>
               <th>Color🎨</th>
-              <th>Height📏</th>
-              <th>Weight⚖️</th>
+              <th>Height(cm)📏</th>
+              <th>Weight(kg)⚖️</th>
               <th>Vaccines💉</th>
               <th>Diseases✅</th>
               <th>Medical History🩺</th>

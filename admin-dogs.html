@@ -89,12 +89,14 @@
 
     .table th, .table td {
       padding: 0.5rem;
+      text-align: center;
       vertical-align: middle;
       white-space: nowrap;
     }
 
     /* Form control styles */
     .form-control {
+      text-align: center;
       font-size: 0.9rem;
       padding: 0.25rem 0.5rem;
       width: 100%;
@@ -102,16 +104,16 @@
 
     /* Column width definitions */
     th:nth-child(1), td:nth-child(1) { width: 60px; } /* ID */
-    th:nth-child(2), td:nth-child(2) { width: 120px; } /* Name */
-    th:nth-child(3), td:nth-child(3) { width: 120px; } /* Breed */
+    th:nth-child(2), td:nth-child(2) { min-width: 120px; } /* Name */
+    th:nth-child(3), td:nth-child(3) { min-width: 160px; } /* Breed */
     th:nth-child(4), td:nth-child(4) { width: 80px; } /* Age */
-    th:nth-child(5), td:nth-child(5) { width: 100px; } /* Color */
+    th:nth-child(5), td:nth-child(5) { min-width: 150px; } /* Color */
     th:nth-child(6), td:nth-child(6) { width: 100px; } /* Height */
     th:nth-child(7), td:nth-child(7) { width: 100px; } /* Weight */
-    th:nth-child(8), td:nth-child(8) { width: 150px; } /* Vaccines */
-    th:nth-child(9), td:nth-child(9) { width: 150px; } /* Diseases */
+    th:nth-child(8), td:nth-child(8) { min-width: 250px; } /* Vaccines */
+    th:nth-child(9), td:nth-child(9) { min-width: 150px; } /* Diseases */
     th:nth-child(10), td:nth-child(10) { min-width: 200px; } /* Medical History */
-    th:nth-child(11), td:nth-child(11) { min-width: 150px; } /* Personality */
+    th:nth-child(11), td:nth-child(11) { min-width: 200px; } /* Personality */
     th:nth-child(12), td:nth-child(12) { width: 100px; } /* Actions */
   </style>
 
@@ -200,8 +202,8 @@
             <th>Breed🐶</th>
             <th>Age🎂</th>
             <th>Color🎨</th>
-            <th>Height📏</th>
-            <th>Weight⚖️</th>
+            <th>Height(cm)📏</th>
+            <th>Weight(kg)⚖️</th>
             <th>Vaccines💉</th>
             <th>Diseases✅</th>
             <th>Medical History🩺</th>

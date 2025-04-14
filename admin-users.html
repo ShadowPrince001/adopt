@@ -80,6 +80,7 @@
 
     .users-table {
       width: 100%;
+      text-align: center;
       border-collapse: collapse;
       background-color: white;
       border-radius: 12px;
@@ -87,32 +88,36 @@
       box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
     }
 
-    .users-table th,
-    .users-table td {
+    .users-table th,.users-table td {
       padding: 1rem;
-      text-align: left;
+      text-align: center;
       border-bottom: 1px solid #e0e0e0;
       white-space: nowrap;
     }
 
     .users-table th {
+      text-align: center;
       background-color: #f0f9f6;
       font-weight: 600;
       color: #333;
     }
-
+    
     .users-table tr:last-child td {
       border-bottom: none;
     }
-    .users-table th:nth-child(1)::after { content: "🆔"; }
-    .users-table th:nth-child(2)::after { content: "👤"; }
+    .users-table th:nth-child(1)::after {content: "🆔"; }
+    .users-table th:nth-child(2)::after {content: "👤"; }
     .users-table th:nth-child(3)::after { content: "📧"; }
     .users-table th:nth-child(4)::after { content: "⚙️"; }
     .users-table th:nth-child(5)::after { content: "📅"; }
     .users-table tr:hover {
       background-color: #f8f8f8;
     }
-
+    th:nth-child(1), td:nth-child(1) { min-width: 60px; } /* ID */
+    th:nth-child(2), td:nth-child(2) { min-width: 100px; } /* Name */
+    th:nth-child(3), td:nth-child(3) { min-width: 100px; } /* Email */
+    th:nth-child(4), td:nth-child(4) { min-width: 80px; } /* Type */
+    th:nth-child(5), td:nth-child(5) { min-width: 100px; } /* Registration Date */
     .no-users-message {
       padding: 2rem;
       text-align: center;

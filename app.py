@@ -48,11 +48,11 @@ with app.app_context():
     db.create_all()
     
     # Create admin user if it doesn't exist
-    admin = User.query.filter_by(email='admin@adoptease.com').first()
+    admin = User.query.filter_by(type='admin').first()
     if not admin:
         admin = User(
-            name='Admin',
-            email='admin@adoptease.com',
+            name='Maheeyan',
+            email='maheeyan@gmail.com',
             password=generate_password_hash('admin123'),
             type='admin'
         )
@@ -514,6 +514,11 @@ def update_expert_dog(dog_id):
         return jsonify({"message": str(e)}), 500
 
 
+
+
+
+
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
+
     app.run(host="0.0.0.0", port=port, debug=True)
