@@ -270,8 +270,14 @@
       </div>
       <button class="logout-btn" id="logout-btn">Sign Out</button>
     </div>
-    <div class="container py-4">
-      <h2 class="mb-4 text-center">Customer Dashboard - Registered Dogs</h2>
+    <div class="container">
+      <div class="header">
+        <h1>Customer Dashboard</h1>
+        <div class="header-buttons">
+          <button id="backButton" class="btn btn-secondary">Back</button>
+          <button id="logoutButton" class="btn btn-danger">Logout</button>
+        </div>
+      </div>
 
       <!-- Filter section -->
       <div class="filter-section">
@@ -305,6 +311,9 @@
           </div>
         </div>
       </div>
+
+      <!-- Message section -->
+      <div id="message" class="alert" style="display: none;"></div>
 
       <!-- Total dogs count -->
       <div id="total-count">Total Dogs: 0</div>

@@ -158,35 +158,13 @@
       </div>
       <button class="logout-btn" id="logout-btn">Sign out</button>
     </div>
-    <div class="container py-4">
-      <h2 class="mb-4 text-center">Expert Dashboard - Registered Dogs</h2>
-
-      <!-- Add New Dog Button -->
-
-
-      <!-- Add Dog Form -->
-      <div id="total-count">Total Dogs: 0</div>
-      <!-- Dogs Table -->
-      <div class="table-responsive">
-        <table class="table table-hover table-bordered bg-white align-middle">
-          <thead class="table-light">
-            <tr>
-              <th>ID🆔</th>
-              <th>Name🏷️</th>
-              <th>Breed🐶</th>
-              <th style="min-width: 80px;">Age🎂</th>
-              <th>Color🎨</th>
-              <th>Height(cm)📏</th>
-              <th>Weight(kg)⚖️</th>
-              <th>Vaccines💉</th>
-              <th>Diseases✅</th>
-              <th>Medical History🩺</th>
-              <th>Personality🌟</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody id="dogTableBody"></tbody>
-        </table>
+    <div class="container">
+      <div class="header">
+        <h1>Expert Dashboard</h1>
+        <div class="header-buttons">
+          <button id="backButton" class="btn btn-secondary">Back</button>
+          <button id="logoutButton" class="btn btn-danger">Logout</button>
+        </div>
       </div>
 
       <!-- Filter section -->
@@ -220,6 +198,34 @@
             </select>
           </div>
         </div>
+      </div>
+
+      <!-- Message section -->
+      <div id="message" class="alert" style="display: none;"></div>
+
+      <!-- Add Dog Form -->
+      <div id="total-count">Total Dogs: 0</div>
+      <!-- Dogs Table -->
+      <div class="table-responsive">
+        <table class="table table-hover table-bordered bg-white align-middle">
+          <thead class="table-light">
+            <tr>
+              <th>ID🆔</th>
+              <th>Name🏷️</th>
+              <th>Breed🐶</th>
+              <th style="min-width: 80px;">Age🎂</th>
+              <th>Color🎨</th>
+              <th>Height(cm)📏</th>
+              <th>Weight(kg)⚖️</th>
+              <th>Vaccines💉</th>
+              <th>Diseases✅</th>
+              <th>Medical History🩺</th>
+              <th>Personality🌟</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="dogTableBody"></tbody>
+        </table>
       </div>
     </div>
 
