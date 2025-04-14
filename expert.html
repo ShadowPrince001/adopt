@@ -213,21 +213,23 @@
             } else {
               updatedData[field] = value;
             }
-            return;
-          }
-          
-          // Convert numeric fields
-          if (['age', 'height', 'weight'].includes(field)) {
-            const numValue = parseFloat(value);
-            if (isNaN(numValue)) {
-              alert(`Invalid ${field} value`);
-              return;
-            }
-            updatedData[field] = numValue;
           } else {
-            updatedData[field] = value;
+            // Convert numeric fields
+            if (['age', 'height', 'weight'].includes(field)) {
+              const numValue = parseFloat(value);
+              if (isNaN(numValue)) {
+                alert(`Invalid ${field} value`);
+                return;
+              }
+              updatedData[field] = numValue;
+            } else {
+              updatedData[field] = value;
+            }
           }
         });
+
+        // Debug: Log the data being sent
+        console.log('Data being sent:', updatedData);
 
         // Validate numeric fields
         if (updatedData.age !== undefined && updatedData.age !== null && (updatedData.age < 0 || updatedData.age > 30)) {
@@ -260,6 +262,7 @@
           .then(res => {
             if (!res.ok) {
               return res.json().then(data => {
+                console.error('Server error response:', data);
                 throw new Error(data.message || 'Failed to update dog');
               });
             }
