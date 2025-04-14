@@ -279,12 +279,14 @@
         const tbody = document.getElementById('dogTableBody');
         tbody.innerHTML = '<tr><td colspan="12" class="text-center">Loading dogs...</td></tr>';
 
-        fetch('/api/dogs', {
+        fetch('/api/expert/dogs', {
           headers: { Authorization: `Bearer ${token}` }
         })
           .then(res => {
             if (!res.ok) {
-              throw new Error('Failed to fetch dogs');
+              return res.json().then(data => {
+                throw new Error(data.message || 'Failed to fetch dogs');
+              });
             }
             return res.json();
           })
@@ -308,10 +310,10 @@
                   <td>${dog.id}</td>
                   <td>${dog.name}</td>
                   <td>${dog.breed}</td>
-                  <td><input class="form-control" data-id="${dog.id}" data-field="age" type="number" min="0" max="35" value="${dog.age || 0}" style="min-width: 80px;"></td>
+                  <td><input class="form-control" data-id="${dog.id}" data-field="age" type="number" min="0" max="30" value="${dog.age || 0}" style="min-width: 80px;"></td>
                   <td><input class="form-control" data-id="${dog.id}" data-field="color" value="${dog.color || ''}" placeholder="Enter color"></td>
-                  <td><input class="form-control" data-id="${dog.id}" data-field="height" type="number" step="0.1" min="7.5" max="150" value="${dog.height || ''}" placeholder="Height (cm)"></td>
-                  <td><input class="form-control" data-id="${dog.id}" data-field="weight" type="number" step="0.1" min="0.25" max="200" value="${dog.weight || ''}" placeholder="Weight (kg)"></td>
+                  <td><input class="form-control" data-id="${dog.id}" data-field="height" type="number" step="0.1" min="0" max="200" value="${dog.height || ''}" placeholder="Height (cm)"></td>
+                  <td><input class="form-control" data-id="${dog.id}" data-field="weight" type="number" step="0.1" min="0" max="100" value="${dog.weight || ''}" placeholder="Weight (kg)"></td>
                   <td><input class="form-control" data-id="${dog.id}" data-field="vaccines" value="${dog.vaccines || ''}"></td>
                   <td><input class="form-control" data-id="${dog.id}" data-field="diseases" value="${dog.diseases || ''}"></td>
                   <td><input class="form-control" data-id="${dog.id}" data-field="medical_history" value="${dog.medical_history || ''}"></td>
