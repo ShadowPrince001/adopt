@@ -464,7 +464,19 @@ def update_expert_dog(user, dog_id):
         if not dog:
             return jsonify({"message": "Dog not found"}), 404
 
-        # Expert can only update medical information
+        # Update all fields that are provided
+        if 'name' in data:
+            dog.name = data['name']
+        if 'breed' in data:
+            dog.breed = data['breed']
+        if 'age' in data:
+            dog.age = data['age']
+        if 'color' in data:
+            dog.color = data['color']
+        if 'height' in data:
+            dog.height = data['height']
+        if 'weight' in data:
+            dog.weight = data['weight']
         if 'vaccines' in data:
             dog.vaccines = data['vaccines']
         if 'diseases' in data:
