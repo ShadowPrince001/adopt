@@ -409,10 +409,39 @@
       const updatedData = {};
       inputs.forEach(input => {
         const value = input.value.trim();
-        if (value !== '') {
-          updatedData[input.dataset.field] = value;
+        const field = input.dataset.field;
+        
+        // Skip empty values for optional fields
+        if (value === '' && ['color', 'vaccines', 'diseases', 'medical_history', 'personality'].includes(field)) {
+          return;
+        }
+        
+        // Convert numeric fields
+        if (['age', 'height', 'weight'].includes(field)) {
+          const numValue = parseFloat(value);
+          if (isNaN(numValue)) {
+            alert(`Invalid ${field} value`);
+            return;
+          }
+          updatedData[field] = numValue;
+        } else {
+          updatedData[field] = value;
         }
       });
+
+      // Validate numeric fields
+      if (updatedData.age !== undefined && (updatedData.age < 0 || updatedData.age > 35)) {
+        alert('Age must be between 0 and 35 years');
+        return;
+      }
+      if (updatedData.height !== undefined && (updatedData.height < 7.5 || updatedData.height > 150)) {
+        alert('Height must be between 7.5cm and 150cm');
+        return;
+      }
+      if (updatedData.weight !== undefined && (updatedData.weight < 0.25 || updatedData.weight > 200)) {
+        alert('Weight must be between 0.25kg and 200kg');
+        return;
+      }
 
       // Step 2: Show loading state
       const saveButton = document.querySelector(`button[onclick="updateDog(${id})"]`);
