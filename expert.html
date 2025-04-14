@@ -204,13 +204,9 @@
           const value = input.value.trim();
           const field = input.dataset.field;
           
-          // Skip empty values for optional fields
+          // Handle empty values for optional fields
           if (value === '' && ['color', 'vaccines', 'diseases', 'medical_history', 'personality'].includes(field)) {
-<<<<<<< HEAD
-            updatedData[field] = null; // Set to null instead of skipping
-=======
             updatedData[field] = null;
->>>>>>> 7af13e0bb4511eb0a7c1cd332475e405ea7169c0
             return;
           }
           
