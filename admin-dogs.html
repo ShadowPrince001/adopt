@@ -161,108 +161,105 @@
 <body>
   <!-- Main container -->
   <div class="admin-container">
-    <!-- Header section with logo and back button -->
     <div class="admin-header">
       <div class="logo-name-wrapper">
         <img src="MY_LOGO.PNG" alt="AdoptEase Logo" class="logo" />
         <div class="company-name">AdoptEase</div>
       </div>
-      <button class="logout-btn" id="logout-btn">Back</button>
+      <button class="logout-btn" id="logout-btn">Sign out</button>
     </div>
+    <div class="container">
+      <h1 class="text-center mb-4">Admin Dashboard</h1>
 
-    <!-- Page title -->
-    <div class="text-center">
-      <h2 class="mb-4">Admin Dashboard - Registered Dogs</h2>
-    </div>
-
-    <!-- Filter section -->
-    <div class="filter-section">
-      <div class="row">
-        <div class="col-md-3">
-          <label for="breedFilter" class="form-label">Filter by Breed:</label>
-          <select class="form-select" id="breedFilter">
-            <option value="">All Breeds</option>
-          </select>
-        </div>
-        <div class="col-md-3">
-          <label for="colorFilter" class="form-label">Filter by Color:</label>
-          <select class="form-select" id="colorFilter">
-            <option value="">All Colors</option>
-          </select>
-        </div>
-        <div class="col-md-3">
-          <label for="sortBy" class="form-label">Sort by:</label>
-          <select class="form-select" id="sortBy">
-            <option value="age_desc">Age (Oldest First)</option>
-            <option value="age_asc">Age (Youngest First)</option>
-            <option value="height_desc">Height (Tallest First)</option>
-            <option value="height_asc">Height (Shortest First)</option>
-            <option value="weight_desc">Weight (Heaviest First)</option>
-            <option value="weight_asc">Weight (Lightest First)</option>
-            <option value="created_desc">Registration Date (Newest First)</option>
-            <option value="created_asc">Registration Date (Oldest First)</option>
-            <option value="name_asc">Name (A-Z)</option>
-            <option value="name_desc">Name (Z-A)</option>
-          </select>
+      <!-- Filter section -->
+      <div class="filter-section">
+        <div class="row">
+          <div class="col-md-3">
+            <label for="breedFilter" class="form-label">Filter by Breed:</label>
+            <select class="form-select" id="breedFilter">
+              <option value="">All Breeds</option>
+            </select>
+          </div>
+          <div class="col-md-3">
+            <label for="colorFilter" class="form-label">Filter by Color:</label>
+            <select class="form-select" id="colorFilter">
+              <option value="">All Colors</option>
+            </select>
+          </div>
+          <div class="col-md-3">
+            <label for="sortBy" class="form-label">Sort by:</label>
+            <select class="form-select" id="sortBy">
+              <option value="age_desc">Age (Oldest First)</option>
+              <option value="age_asc">Age (Youngest First)</option>
+              <option value="height_desc">Height (Tallest First)</option>
+              <option value="height_asc">Height (Shortest First)</option>
+              <option value="weight_desc">Weight (Heaviest First)</option>
+              <option value="weight_asc">Weight (Lightest First)</option>
+              <option value="created_desc">Registration Date (Newest First)</option>
+              <option value="created_asc">Registration Date (Oldest First)</option>
+              <option value="name_asc">Name (A-Z)</option>
+              <option value="name_desc">Name (Z-A)</option>
+            </select>
+          </div>
         </div>
       </div>
-    </div>
 
-    <!-- Add new dog button -->
-    <div class="d-flex justify-content-end mb-2">
-      <button class="btn btn-primary" onclick="showAddForm()">➕ Add New Dog</button>
-    </div>
+      <!-- Add new dog button -->
+      <div class="d-flex justify-content-end mb-2">
+        <button class="btn btn-primary" onclick="showAddForm()">➕ Add New Dog</button>
+      </div>
 
-    <!-- Add dog form (hidden by default) -->
-    <div id="addDogForm" style="display: none;" class="border rounded p-3 mb-4 bg-white">
-      <h5 class="mb-3">Add New Dog</h5>
-      <div class="row g-2">
-        <div class="col-md-2"><input type="text" class="form-control" placeholder="Name" id="addName"></div>
-        <div class="col-md-2"><input type="text" class="form-control" placeholder="Breed" id="addBreed"></div>
-        <div class="col-md-1"><input type="number" min="0" max="35" class="form-control" placeholder="Age" id="addAge"></div>
-        <div class="col-md-2"><input type="text" class="form-control" placeholder="Color" id="addColor"></div>
-        <div class="col-md-2"><input type="number" step="0.1" min="7.5" max="150" class="form-control" placeholder="Height (cm)" id="addHeight"></div>
-        <div class="col-md-2"><input type="number" step="0.1" min="0.25" max="200" class="form-control" placeholder="Weight (kg)" id="addWeight"></div>
-        <div class="col-md-2"><input type="text" class="form-control" placeholder="Vaccines" id="addVaccines"></div>
-        <div class="col-md-2"><input type="text" class="form-control" placeholder="Diseases" id="addDiseases"></div>
-        <div class="col-md-12 mt-2">
-          <input type="text" class="form-control" placeholder="Medical History" id="addMedicalHistory">
-        </div>
-        <div class="col-md-12 mt-2">
-          <input type="text" class="form-control" placeholder="Personality" id="addPersonality">
-        </div>
-        <div class="col-md-12 mt-3">
-          <button class="btn btn-success me-2" onclick="submitNewDog()">Submit</button>
-          <button class="btn btn-secondary" onclick="hideAddForm()">Cancel</button>
+      <!-- Add dog form (hidden by default) -->
+      <div id="addDogForm" style="display: none;" class="border rounded p-3 mb-4 bg-white">
+        <h5 class="mb-3">Add New Dog</h5>
+        <div class="row g-2">
+          <div class="col-md-2"><input type="text" class="form-control" placeholder="Name" id="addName"></div>
+          <div class="col-md-2"><input type="text" class="form-control" placeholder="Breed" id="addBreed"></div>
+          <div class="col-md-1"><input type="number" min="0" max="35" class="form-control" placeholder="Age" id="addAge"></div>
+          <div class="col-md-2"><input type="text" class="form-control" placeholder="Color" id="addColor"></div>
+          <div class="col-md-2"><input type="number" step="0.1" min="7.5" max="150" class="form-control" placeholder="Height (cm)" id="addHeight"></div>
+          <div class="col-md-2"><input type="number" step="0.1" min="0.25" max="200" class="form-control" placeholder="Weight (kg)" id="addWeight"></div>
+          <div class="col-md-2"><input type="text" class="form-control" placeholder="Vaccines" id="addVaccines"></div>
+          <div class="col-md-2"><input type="text" class="form-control" placeholder="Diseases" id="addDiseases"></div>
+          <div class="col-md-12 mt-2">
+            <input type="text" class="form-control" placeholder="Medical History" id="addMedicalHistory">
+          </div>
+          <div class="col-md-12 mt-2">
+            <input type="text" class="form-control" placeholder="Personality" id="addPersonality">
+          </div>
+          <div class="col-md-12 mt-3">
+            <button class="btn btn-success me-2" onclick="submitNewDog()">Submit</button>
+            <button class="btn btn-secondary" onclick="hideAddForm()">Cancel</button>
+          </div>
         </div>
       </div>
-    </div>
 
-    <!-- Total dogs count -->
-    <div id="total-count">Total Dogs: 0</div>
+      <!-- Total dogs count -->
+      <div id="total-count">Total Dogs: 0</div>
 
-    <!-- Dogs table -->
-    <div class="table-responsive">
-      <table class="table table-hover table-bordered bg-white align-middle">
-        <thead class="table-light">
-          <tr>
-            <th>ID🆔</th>
-            <th>Name🏷️</th>
-            <th>Breed🐶</th>
-            <th>Age🎂</th>
-            <th>Color🎨</th>
-            <th>Height(cm)📏</th>
-            <th>Weight(kg)⚖️</th>
-            <th>Vaccines💉</th>
-            <th>Diseases✅</th>
-            <th>Medical History🩺</th>
-            <th>Personality🌟</th>
-            <th>Registration Date</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody id="dogTableBody"></tbody>
-      </table>
+      <!-- Dogs table -->
+      <div class="table-responsive">
+        <table class="table table-hover table-bordered bg-white align-middle">
+          <thead class="table-light">
+            <tr>
+              <th>ID🆔</th>
+              <th>Name🏷️</th>
+              <th>Breed��</th>
+              <th>Age🎂</th>
+              <th>Color🎨</th>
+              <th>Height(cm)📏</th>
+              <th>Weight(kg)⚖️</th>
+              <th>Vaccines💉</th>
+              <th>Diseases✅</th>
+              <th>Medical History🩺</th>
+              <th>Personality🌟</th>
+              <th>Registration Date</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="dogTableBody"></tbody>
+        </table>
+      </div>
     </div>
   </div>
 
