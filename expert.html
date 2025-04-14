@@ -205,8 +205,14 @@
           const field = input.dataset.field;
           
           // Handle empty values for optional fields
-          if (value === '' && ['color', 'vaccines', 'diseases', 'medical_history', 'personality'].includes(field)) {
-            updatedData[field] = null;
+          if (value === '') {
+            if (['color', 'vaccines', 'diseases', 'medical_history', 'personality'].includes(field)) {
+              updatedData[field] = null;
+            } else if (['age', 'height', 'weight'].includes(field)) {
+              updatedData[field] = null;
+            } else {
+              updatedData[field] = value;
+            }
             return;
           }
           
@@ -224,15 +230,15 @@
         });
 
         // Validate numeric fields
-        if (updatedData.age !== undefined && (updatedData.age < 0 || updatedData.age > 30)) {
+        if (updatedData.age !== undefined && updatedData.age !== null && (updatedData.age < 0 || updatedData.age > 30)) {
           alert('Age must be between 0 and 30 years');
           return;
         }
-        if (updatedData.height !== undefined && (updatedData.height <= 0 || updatedData.height > 200)) {
+        if (updatedData.height !== undefined && updatedData.height !== null && (updatedData.height <= 0 || updatedData.height > 200)) {
           alert('Height must be between 0 and 200 cm');
           return;
         }
-        if (updatedData.weight !== undefined && (updatedData.weight <= 0 || updatedData.weight > 100)) {
+        if (updatedData.weight !== undefined && updatedData.weight !== null && (updatedData.weight <= 0 || updatedData.weight > 100)) {
           alert('Weight must be between 0 and 100 kg');
           return;
         }
