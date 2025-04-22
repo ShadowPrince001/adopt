@@ -36,16 +36,30 @@ db = SQLAlchemy(app)
 
 # Create tables and run sync
 with app.app_context():
-    # Create tables
-    Base.metadata.create_all(db.engine)
-    
-    # Run sync
     try:
+        # Create tables
+        Base.metadata.create_all(db.engine)
+        logger.info("Database tables created successfully")
+        
+        # Create admin user if it doesn't exist
+        admin = User.query.filter_by(type='admin').first()
+        if not admin:
+            admin = User(
+                name='Maheeyan',
+                email='maheeyan@gmail.com',
+                password=generate_password_hash('admin123'),
+                type='admin'
+            )
+            db.session.add(admin)
+            db.session.commit()
+            logger.info("Admin user created successfully")
+        
+        # Run sync
         from sync_databases import sync_databases
         sync_databases()
         logger.info("Database synchronization completed successfully")
     except Exception as e:
-        logger.error(f"Error during database synchronization: {str(e)}")
+        logger.error(f"Error during database initialization: {str(e)}")
         # Continue with application startup even if sync fails
         pass
 

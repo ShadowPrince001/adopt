@@ -32,13 +32,21 @@ class Dog(Base):
 
 def get_latest_timestamp(session, model):
     """Get the latest timestamp from a model's records"""
-    latest = session.query(model).order_by(model.created_at.desc()).first()
-    return latest.created_at if latest else datetime.min
+    try:
+        latest = session.query(model).order_by(model.created_at.desc()).first()
+        return latest.created_at if latest else datetime.min
+    except Exception as e:
+        print(f"Error getting latest timestamp: {str(e)}")
+        return datetime.min
 
 def sync_databases():
     # Create both database engines
     sqlite_engine = create_engine('sqlite:///adoptease.db')
     postgres_engine = create_engine(os.getenv('DATABASE_URL'))
+    
+    # Create tables in both databases
+    Base.metadata.create_all(sqlite_engine)
+    Base.metadata.create_all(postgres_engine)
     
     # Create sessions
     SQLiteSession = sessionmaker(bind=sqlite_engine)
