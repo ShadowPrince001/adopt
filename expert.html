@@ -115,7 +115,8 @@
     .table th:nth-child(9), .table td:nth-child(9) { min-width: 200px; } /* Diseases */
     .table th:nth-child(10), .table td:nth-child(10) { min-width: 300px; } /* Medical History */
     .table th:nth-child(11), .table td:nth-child(11) { min-width: 300px; } /* Personality */
-    .table th:nth-child(12), .table td:nth-child(12) { min-width: 100px; } /* Actions */
+    .table th:nth-child(12), .table td:nth-child(12) { min-width: 100px; } /* Registration Date */
+    .table th:nth-child(13), .table td:nth-child(13) { min-width: 100px; } /* Actions */
 
     .table tr:hover {
       background-color: #f8f8f8;
@@ -215,7 +216,8 @@
               <th>Diseases✅</th>
               <th>Medical History🩺</th>
               <th>Personality🌟</th>
-              <th>Actions</th>
+              <th>Registration Date📅</th>
+              <th>Actions👇</th>
             </tr>
           </thead>
           <tbody id="dogTableBody"></tbody>
@@ -376,6 +378,96 @@
         localStorage.removeItem('authToken');
         window.location.href = '/index.html';
       });
+
+      /**
+       * Data Update
+       * Handles updating dog information in the database
+       * Steps:
+       * 1. Collect updated data from input fields
+       * 2. Show loading state
+       * 3. Send PUT request to server
+       * 4. Handle response and update UI
+       * @param {number} id - The ID of the dog to update
+       */
+      function updateDog(id) {
+        // Step 1: Collect updated data from input fields
+        const inputs = document.querySelectorAll(`[data-id="${id}"]`);
+        const updatedData = {};
+        inputs.forEach(input => {
+          const value = input.value.trim();
+          const field = input.dataset.field;
+          
+          // Skip empty values for optional fields
+          if (value === '' && ['color', 'vaccines', 'diseases', 'medical_history', 'personality'].includes(field)) {
+            return;
+          }
+          
+          // Convert numeric fields
+          if (['age', 'height', 'weight'].includes(field)) {
+            const numValue = parseFloat(value);
+            if (isNaN(numValue)) {
+              alert(`Invalid ${field} value`);
+              return;
+            }
+            updatedData[field] = numValue;
+          } else {
+            updatedData[field] = value;
+          }
+        });
+
+        // Validate numeric fields
+        if (updatedData.age !== undefined && (updatedData.age < 0 || updatedData.age > 35)) {
+          alert('Age must be between 0 and 35 years');
+          return;
+        }
+        if (updatedData.height !== undefined && (updatedData.height < 7.5 || updatedData.height > 150)) {
+          alert('Height must be between 7.5cm and 150cm');
+          return;
+        }
+        if (updatedData.weight !== undefined && (updatedData.weight < 0.25 || updatedData.weight > 200)) {
+          alert('Weight must be between 0.25kg and 200kg');
+          return;
+        }
+
+        // Step 2: Show loading state
+        const saveButton = document.querySelector(`button[onclick="updateDog(${id})"]`);
+        const originalText = saveButton.textContent;
+        saveButton.textContent = 'Saving...';
+        saveButton.disabled = true;
+
+        // Step 3: Send PUT request to server
+        fetch(`/api/expert/dogs/${id}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify(updatedData)
+        })
+          .then(res => {
+            if (!res.ok) {
+              return res.json().then(data => {
+                throw new Error(data.message || 'Failed to update dog');
+              });
+            }
+            return res.json();
+          })
+          .then(res => {
+            // Step 4: Handle response and update UI
+            console.log('Update successful:', res);
+            loadDogs(); // Refresh the table
+            alert('Dog information updated successfully');
+          })
+          .catch(err => {
+            console.error('Error updating dog:', err);
+            alert(err.message || 'Failed to update dog. Please check your input values.');
+          })
+          .finally(() => {
+            // Restore button state
+            saveButton.textContent = originalText;
+            saveButton.disabled = false;
+          });
+      }
 
       // Initialization
       loadDogs();

@@ -109,7 +109,7 @@
     .table th:nth-child(9), .table td:nth-child(9) { min-width: 150px; } /* Diseases */
     .table th:nth-child(10), .table td:nth-child(10) { min-width: 200px; } /* Medical History */
     .table th:nth-child(11), .table td:nth-child(11) { min-width: 200px; } /* Personality */
-    .table th:nth-child(12), .table td:nth-child(12) { min-width: 100px; } /* Actions */
+    .table th:nth-child(12), .table td:nth-child(12) { min-width: 100px; } /* Registration Date */
 
     .table tr:hover {
       background-color: #f8f8f8;
@@ -328,7 +328,6 @@
               <th>Medical History🩺</th>
               <th>Personality🌟</th>
               <th>Registration Date📅</th>
-              <th>Actions👇</th>
             </tr>
           </thead>
           <tbody id="dogTableBody"></tbody>
@@ -445,9 +444,6 @@
               <td>${dog.medical_history || 'N/A'}</td>
               <td>${dog.personality || 'N/A'}</td>
               <td>${date}</td>
-              <td>
-                <button class="btn btn-primary btn-sm" onclick="startChat(${dog.id})">Chat</button>
-              </td>
             </tr>
           `;
         });
