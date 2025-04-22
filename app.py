@@ -2,7 +2,7 @@ from flask import Flask, request, jsonify, send_from_directory
 import os
 import jwt
 import requests
-import datetime
+from datetime import datetime, timedelta
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_sqlalchemy import SQLAlchemy
 from dotenv import load_dotenv
@@ -100,30 +100,6 @@ def admin_required(f):
         return f(user, *args, **kwargs)
     return decorated
 
-# Define models
-class User(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(100), nullable=False)
-    email = db.Column(db.String(120), unique=True, nullable=False)
-    password = db.Column(db.String(200), nullable=False)
-    type = db.Column(db.String(20), nullable=False)  # admin, customer, or expert
-    created_at = db.Column(db.DateTime, default=datetime.datetime.utcnow)
-
-class Dog(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(100), nullable=False)
-    breed = db.Column(db.String(100), nullable=False)
-    age = db.Column(db.Integer, nullable=False)
-    color = db.Column(db.String(100), nullable=False)
-    height = db.Column(db.Float, nullable=False)  # in cm
-    weight = db.Column(db.Float, nullable=False)  # in kg
-    gender = db.Column(db.String(10), nullable=False)  # Male or Female
-    vaccines = db.Column(db.String(500))
-    diseases = db.Column(db.String(500))
-    medical_history = db.Column(db.String(1000))
-    personality = db.Column(db.String(500))
-    created_at = db.Column(db.DateTime, default=datetime.datetime.utcnow)
-
 # Input validation functions
 def validate_dog_data(data):
     errors = []
@@ -181,7 +157,7 @@ def login():
         if not check_password_hash(user.password, password):
             return jsonify({"message": "Incorrect password"}), 401
 
-        expiration = datetime.datetime.utcnow() + datetime.timedelta(
+        expiration = datetime.utcnow() + timedelta(
             days=30 if remember_me else 1
         )
         token = jwt.encode(

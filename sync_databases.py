@@ -1,5 +1,5 @@
 import os
-from sqlalchemy import create_engine, Column, Integer, String, Float, DateTime
+from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from datetime import datetime
 from flask_sqlalchemy import SQLAlchemy
@@ -9,28 +9,28 @@ db = SQLAlchemy()
 
 class User(db.Model):
     __tablename__ = 'user'
-    id = Column(Integer, primary_key=True)
-    name = Column(String(100), nullable=False)
-    email = Column(String(120), unique=True, nullable=False)
-    password = Column(String(200), nullable=False)
-    type = Column(String(20), nullable=False)  # admin, customer, or expert
-    created_at = Column(DateTime, default=datetime.utcnow)
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), nullable=False)
+    email = db.Column(db.String(120), unique=True, nullable=False)
+    password = db.Column(db.String(200), nullable=False)
+    type = db.Column(db.String(20), nullable=False)  # admin, customer, or expert
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
 class Dog(db.Model):
     __tablename__ = 'dog'
-    id = Column(Integer, primary_key=True)
-    name = Column(String(100), nullable=False)
-    breed = Column(String(100), nullable=False)
-    age = Column(Integer, nullable=False)
-    color = Column(String(100), nullable=False)
-    height = Column(Float, nullable=False)  # in cm
-    weight = Column(Float, nullable=False)  # in kg
-    gender = Column(String(10), nullable=False)  # Male or Female
-    vaccines = Column(String(500))
-    diseases = Column(String(500))
-    medical_history = Column(String(1000))
-    personality = Column(String(500))
-    created_at = Column(DateTime, default=datetime.utcnow)
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), nullable=False)
+    breed = db.Column(db.String(100), nullable=False)
+    age = db.Column(db.Integer, nullable=False)
+    color = db.Column(db.String(100), nullable=False)
+    height = db.Column(db.Float, nullable=False)  # in cm
+    weight = db.Column(db.Float, nullable=False)  # in kg
+    gender = db.Column(db.String(10), nullable=False)  # Male or Female
+    vaccines = db.Column(db.String(500))
+    diseases = db.Column(db.String(500))
+    medical_history = db.Column(db.String(1000))
+    personality = db.Column(db.String(500))
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
 def get_latest_timestamp(session, model):
     """Get the latest timestamp from a model's records"""
