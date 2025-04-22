@@ -8,7 +8,7 @@ from flask_sqlalchemy import SQLAlchemy
 db = SQLAlchemy()
 
 class User(db.Model):
-    __tablename__ = 'user'  # Changed to match actual table name
+    __tablename__ = 'user'  # Using singular form to match existing database
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
@@ -17,7 +17,7 @@ class User(db.Model):
     created_at = db.Column(db.DateTime, nullable=False)
 
 class Dog(db.Model):
-    __tablename__ = 'dog'  # Changed to match actual table name
+    __tablename__ = 'dog'  # Using singular form to match existing database
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
     breed = db.Column(db.String(100), nullable=False)
