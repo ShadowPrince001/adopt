@@ -8,7 +8,7 @@ from flask_sqlalchemy import SQLAlchemy
 from dotenv import load_dotenv
 import logging
 from functools import wraps
-from sync_databases import sync_databases
+from sync_databases import User, Dog, Base
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -34,9 +34,14 @@ logger.info(f"OPENROUTER_API_KEY: {'Set' if os.getenv('OPENROUTER_API_KEY') else
 
 db = SQLAlchemy(app)
 
-# Run database synchronization on startup
+# Create tables and run sync
 with app.app_context():
+    # Create tables
+    Base.metadata.create_all(db.engine)
+    
+    # Run sync
     try:
+        from sync_databases import sync_databases
         sync_databases()
         logger.info("Database synchronization completed successfully")
     except Exception as e:
@@ -134,22 +139,6 @@ def validate_user_data(data):
     if not data.get('type') or data['type'] not in ['admin', 'customer', 'expert']:
         errors.append("Invalid user type")
     return errors
-
-# Create tables
-with app.app_context():
-    db.create_all()
-    
-    # Create admin user if it doesn't exist
-    admin = User.query.filter_by(type='admin').first()
-    if not admin:
-        admin = User(
-            name='Maheeyan',
-            email='maheeyan@gmail.com',
-            password=generate_password_hash('admin123'),
-            type='admin'
-        )
-        db.session.add(admin)
-        db.session.commit()
 
 @app.route("/")
 def index():

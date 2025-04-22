@@ -1,8 +1,34 @@
-from app import app, db, User, Dog
 import os
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy import create_engine, Column, Integer, String, Float, DateTime
+from sqlalchemy.orm import sessionmaker, declarative_base
 from datetime import datetime
+
+Base = declarative_base()
+
+class User(Base):
+    __tablename__ = 'user'
+    id = Column(Integer, primary_key=True)
+    name = Column(String(100), nullable=False)
+    email = Column(String(120), unique=True, nullable=False)
+    password = Column(String(200), nullable=False)
+    type = Column(String(20), nullable=False)  # admin, customer, or expert
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+class Dog(Base):
+    __tablename__ = 'dog'
+    id = Column(Integer, primary_key=True)
+    name = Column(String(100), nullable=False)
+    breed = Column(String(100), nullable=False)
+    age = Column(Integer, nullable=False)
+    color = Column(String(100), nullable=False)
+    height = Column(Float, nullable=False)  # in cm
+    weight = Column(Float, nullable=False)  # in kg
+    gender = Column(String(10), nullable=False)  # Male or Female
+    vaccines = Column(String(500))
+    diseases = Column(String(500))
+    medical_history = Column(String(1000))
+    personality = Column(String(500))
+    created_at = Column(DateTime, default=datetime.utcnow)
 
 def get_latest_timestamp(session, model):
     """Get the latest timestamp from a model's records"""
