@@ -5,3 +5,4 @@ PyJWT==2.8.0
 Werkzeug==2.3.7
 SQLAlchemy==2.0.23
 requests
+psycopg2-binary==2.9.9

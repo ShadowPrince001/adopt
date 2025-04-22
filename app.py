@@ -16,7 +16,13 @@ logger = logging.getLogger(__name__)
 load_dotenv()
 app = Flask(__name__, static_folder=".")
 app.config["SECRET_KEY"] = os.getenv("SECRET_KEY", "default_secret_key_for_development_only")
-app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///adoptease.db"
+
+# Database configuration
+if os.getenv("DATABASE_URL"):
+    app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("DATABASE_URL").replace("postgres://", "postgresql://")
+else:
+    app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///adoptease.db"
+
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.config["RATE_LIMIT"] = "100 per day"  # Basic rate limiting
 
