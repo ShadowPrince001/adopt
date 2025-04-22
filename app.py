@@ -80,6 +80,7 @@ class Dog(db.Model):
     color = db.Column(db.String(100), nullable=False)
     height = db.Column(db.Float, nullable=False)  # in cm
     weight = db.Column(db.Float, nullable=False)  # in kg
+    gender = db.Column(db.String(10), nullable=False)  # Male or Female
     vaccines = db.Column(db.String(500))
     diseases = db.Column(db.String(500))
     medical_history = db.Column(db.String(1000))
@@ -101,6 +102,8 @@ def validate_dog_data(data):
         errors.append("Height must be a positive number between 0 and 200 cm")
     if not data.get('weight') or not isinstance(data['weight'], (int, float)) or data['weight'] <= 0 or data['weight'] > 100:
         errors.append("Weight must be a positive number between 0 and 100 kg")
+    if not data.get('gender') or data['gender'] not in ['Male', 'Female']:
+        errors.append("Gender must be either Male or Female")
     return errors
 
 def validate_user_data(data):
@@ -249,6 +252,7 @@ def get_admin_dogs(user):
                 "id": dog.id,
                 "name": dog.name,
                 "breed": dog.breed,
+                "gender": dog.gender,
                 "age": dog.age,
                 "color": dog.color,
                 "height": dog.height,
@@ -286,6 +290,7 @@ def add_dog(user):
             color=data['color'],
             height=data['height'],
             weight=data['weight'],
+            gender=data['gender'],
             vaccines=data.get('vaccines', ''),
             diseases=data.get('diseases', ''),
             medical_history=data.get('medical_history', ''),
@@ -324,6 +329,7 @@ def edit_dog(user, dog_id):
         dog.color = data['color']
         dog.height = data['height']
         dog.weight = data['weight']
+        dog.gender = data['gender']
         dog.vaccines = data.get('vaccines', dog.vaccines)
         dog.diseases = data.get('diseases', dog.diseases)
         dog.medical_history = data.get('medical_history', dog.medical_history)
@@ -365,6 +371,7 @@ def get_dogs(user):
                 "id": dog.id,
                 "name": dog.name,
                 "breed": dog.breed,
+                "gender": dog.gender,
                 "age": dog.age,
                 "color": dog.color,
                 "height": dog.height,
@@ -392,6 +399,7 @@ def get_all_dog(user):
                 "id": dog.id,
                 "name": dog.name,
                 "breed": dog.breed,
+                "gender": dog.gender,
                 "age": dog.age,
                 "color": dog.color,
                 "height": dog.height,
@@ -454,7 +462,7 @@ def chat(user):
 
 @app.route("/api/expert/dogs/<int:dog_id>", methods=["PUT"])
 @token_required
-def update_expert_dog(user, dog_id):
+def update_dog_expert(user, dog_id):
     try:
         data = request.get_json()
         if not data:
@@ -464,28 +472,12 @@ def update_expert_dog(user, dog_id):
         if not dog:
             return jsonify({"message": "Dog not found"}), 404
 
-        # Update all fields that are provided
-        if 'name' in data:
-            dog.name = data['name']
-        if 'breed' in data:
-            dog.breed = data['breed']
-        if 'age' in data:
-            dog.age = data['age']
-        if 'color' in data:
-            dog.color = data['color']
-        if 'height' in data:
-            dog.height = data['height']
-        if 'weight' in data:
-            dog.weight = data['weight']
-        if 'vaccines' in data:
-            dog.vaccines = data['vaccines']
-        if 'diseases' in data:
-            dog.diseases = data['diseases']
-        if 'medical_history' in data:
-            dog.medical_history = data['medical_history']
-        if 'personality' in data:
-            dog.personality = data['personality']
-
+        allowed_fields = ['name', 'breed', 'age', 'color', 'height', 'weight', 'vaccines', 'diseases']
+        
+        for field in allowed_fields:
+            if field in data:
+                setattr(dog, field, data[field])
+        
         db.session.commit()
         logger.info(f"Expert updated dog {dog.name}")
         return jsonify({"message": "Dog information updated successfully"})

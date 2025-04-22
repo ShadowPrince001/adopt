@@ -208,6 +208,7 @@
               <th>ID🆔</th>
               <th>Name🏷️</th>
               <th>Breed🐶</th>
+              <th>Gender👫</th>
               <th style="min-width: 80px;">Age🎂</th>
               <th>Color🎨</th>
               <th>Height(cm)📏</th>
@@ -312,6 +313,7 @@
               <td><input class="form-control" data-id="${dog.id}" data-field="name" value="${dog.id}" readonly></td>
               <td><input class="form-control" data-id="${dog.id}" data-field="name" value="${dog.name}" readonly></td>
               <td><input class="form-control" data-id="${dog.id}" data-field="breed" value="${dog.breed}" readonly></td>
+              <td>${dog.gender}</td>
               <td><input class="form-control" data-id="${dog.id}" data-field="age" type="number" min="0" max="35" value="${dog.age}"></td>
               <td><input class="form-control" data-id="${dog.id}" data-field="color" value="${dog.color || ''}" placeholder="Enter color"></td>
               <td><input class="form-control" data-id="${dog.id}" data-field="height" type="number" step="0.1" min="7.5" max="150" value="${dog.height || ''}" placeholder="Height (cm)"></td>

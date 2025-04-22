@@ -107,16 +107,17 @@
     .table th:nth-child(1), .table td:nth-child(1) { min-width: 50px; } /* ID */
     .table th:nth-child(2), .table td:nth-child(2) { min-width: 120px; } /* Name */
     .table th:nth-child(3), .table td:nth-child(3) { min-width: 200px; } /* Breed */
-    .table th:nth-child(4), .table td:nth-child(4) { min-width: 80px; } /* Age */
-    .table th:nth-child(5), .table td:nth-child(5) { min-width: 170px; } /* Color */
-    .table th:nth-child(6), .table td:nth-child(6) { min-width: 100px; } /* Height */
-    .table th:nth-child(7), .table td:nth-child(7) { min-width: 100px; } /* Weight */
-    .table th:nth-child(8), .table td:nth-child(8) { min-width: 250px; } /* Vaccines */
-    .table th:nth-child(9), .table td:nth-child(9) { min-width: 150px; } /* Diseases */
-    .table th:nth-child(10), .table td:nth-child(10) { min-width: 220px; } /* Medical History */
-    .table th:nth-child(11), .table td:nth-child(11) { min-width: 220px; } /* Personality */
-    .table th:nth-child(12), .table td:nth-child(12) { min-width: 120px; } /* Registration Date */
-    .table th:nth-child(13), .table td:nth-child(13) { min-width: 100px; } /* Actions */
+    .table th:nth-child(4), .table td:nth-child(4) { min-width: 100px; } /* Gender */
+    .table th:nth-child(5), .table td:nth-child(5) { min-width: 80px; } /* Age */
+    .table th:nth-child(6), .table td:nth-child(6) { min-width: 170px; } /* Color */
+    .table th:nth-child(7), .table td:nth-child(7) { min-width: 100px; } /* Height */
+    .table th:nth-child(8), .table td:nth-child(8) { min-width: 100px; } /* Weight */
+    .table th:nth-child(9), .table td:nth-child(9) { min-width: 250px; } /* Vaccines */
+    .table th:nth-child(10), .table td:nth-child(10) { min-width: 150px; } /* Diseases */
+    .table th:nth-child(11), .table td:nth-child(11) { min-width: 220px; } /* Medical History */
+    .table th:nth-child(12), .table td:nth-child(12) { min-width: 220px; } /* Personality */
+    .table th:nth-child(13), .table td:nth-child(13) { min-width: 120px; } /* Registration Date */
+    .table th:nth-child(14), .table td:nth-child(14) { min-width: 100px; } /* Actions */
 
     .table tr:hover {
       background-color: #f8f8f8;
@@ -215,6 +216,13 @@
         <div class="row g-2">
           <div class="col-md-2"><input type="text" class="form-control" placeholder="Name" id="addName"></div>
           <div class="col-md-2"><input type="text" class="form-control" placeholder="Breed" id="addBreed"></div>
+          <div class="col-md-2">
+            <select class="form-control" id="addGender">
+              <option value="">Select Gender</option>
+              <option value="Male">Male</option>
+              <option value="Female">Female</option>
+            </select>
+          </div>
           <div class="col-md-1"><input type="number" min="0" max="35" class="form-control" placeholder="Age" id="addAge"></div>
           <div class="col-md-2"><input type="text" class="form-control" placeholder="Color" id="addColor"></div>
           <div class="col-md-2"><input type="number" step="0.1" min="7.5" max="150" class="form-control" placeholder="Height (cm)" id="addHeight"></div>
@@ -245,6 +253,7 @@
               <th>ID🆔</th>
               <th>Name🏷️</th>
               <th>Breed🐶</th>
+              <th>Gender👫</th>
               <th>Age🎂</th>
               <th>Color🎨</th>
               <th>Height(cm)📏</th>
@@ -317,6 +326,7 @@
       const color = document.getElementById('addColor').value.trim();
       const height = parseFloat(document.getElementById('addHeight').value);
       const weight = parseFloat(document.getElementById('addWeight').value);
+      const gender = document.getElementById('addGender').value;
       const vaccines = document.getElementById('addVaccines').value.trim();
       const diseases = document.getElementById('addDiseases').value.trim();
       const medicalHistory = document.getElementById('addMedicalHistory').value.trim();
@@ -354,6 +364,7 @@
         color: color || null,
         height: height,
         weight: weight,
+        gender: gender,
         vaccines: vaccines || null,
         diseases: diseases || null,
         medical_history: medicalHistory || null,
@@ -632,6 +643,12 @@
             <td><input class="form-control" data-id="${dog.id}" data-field="name" value="${dog.id}" readonly></td>
             <td><input class="form-control" data-id="${dog.id}" data-field="name" value="${dog.name}"></td>
             <td><input class="form-control" data-id="${dog.id}" data-field="breed" value="${dog.breed}"></td>
+            <td>
+              <select class="form-control" data-id="${dog.id}" data-field="gender">
+                <option value="Male" ${dog.gender === 'Male' ? 'selected' : ''}>Male</option>
+                <option value="Female" ${dog.gender === 'Female' ? 'selected' : ''}>Female</option>
+              </select>
+            </td>
             <td><input class="form-control" data-id="${dog.id}" data-field="age" type="number" min="0" max="35" value="${dog.age}"></td>
             <td><input class="form-control" data-id="${dog.id}" data-field="color" value="${dog.color || ''}" placeholder="Enter color"></td>
             <td><input class="form-control" data-id="${dog.id}" data-field="height" type="number" step="0.1" min="7.5" max="150" value="${dog.height || ''}" placeholder="Height (cm)"></td>
