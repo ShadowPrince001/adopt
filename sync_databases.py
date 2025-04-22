@@ -1,11 +1,13 @@
 import os
 from sqlalchemy import create_engine, Column, Integer, String, Float, DateTime
-from sqlalchemy.orm import sessionmaker, declarative_base
+from sqlalchemy.orm import sessionmaker
 from datetime import datetime
+from flask_sqlalchemy import SQLAlchemy
 
-Base = declarative_base()
+# Initialize Flask-SQLAlchemy
+db = SQLAlchemy()
 
-class User(Base):
+class User(db.Model):
     __tablename__ = 'user'
     id = Column(Integer, primary_key=True)
     name = Column(String(100), nullable=False)
@@ -14,7 +16,7 @@ class User(Base):
     type = Column(String(20), nullable=False)  # admin, customer, or expert
     created_at = Column(DateTime, default=datetime.utcnow)
 
-class Dog(Base):
+class Dog(db.Model):
     __tablename__ = 'dog'
     id = Column(Integer, primary_key=True)
     name = Column(String(100), nullable=False)
@@ -44,10 +46,6 @@ def sync_databases():
     sqlite_engine = create_engine('sqlite:///adoptease.db')
     postgres_engine = create_engine(os.getenv('DATABASE_URL'))
     
-    # Create tables in both databases
-    Base.metadata.create_all(sqlite_engine)
-    Base.metadata.create_all(postgres_engine)
-    
     # Create sessions
     SQLiteSession = sessionmaker(bind=sqlite_engine)
     PostgreSQLSession = sessionmaker(bind=postgres_engine)
@@ -55,6 +53,12 @@ def sync_databases():
     postgres_session = PostgreSQLSession()
 
     try:
+        # Create tables in both databases
+        User.__table__.create(bind=sqlite_engine, checkfirst=True)
+        Dog.__table__.create(bind=sqlite_engine, checkfirst=True)
+        User.__table__.create(bind=postgres_engine, checkfirst=True)
+        Dog.__table__.create(bind=postgres_engine, checkfirst=True)
+
         # Get latest timestamps from both databases
         sqlite_latest_user = get_latest_timestamp(sqlite_session, User)
         sqlite_latest_dog = get_latest_timestamp(sqlite_session, Dog)

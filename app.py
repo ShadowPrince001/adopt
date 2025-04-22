@@ -8,7 +8,7 @@ from flask_sqlalchemy import SQLAlchemy
 from dotenv import load_dotenv
 import logging
 from functools import wraps
-from sync_databases import User, Dog, Base
+from sync_databases import User, Dog, db
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -27,18 +27,19 @@ else:
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.config["RATE_LIMIT"] = "100 per day"  # Basic rate limiting
 
+# Initialize Flask-SQLAlchemy
+db.init_app(app)
+
 # Print environment variables for debugging
 logger.info("Environment variables loaded:")
 logger.info(f"SECRET_KEY: {'Set' if os.getenv('SECRET_KEY') else 'Not set'}")
 logger.info(f"OPENROUTER_API_KEY: {'Set' if os.getenv('OPENROUTER_API_KEY') else 'Not set'}")
 
-db = SQLAlchemy(app)
-
 # Create tables and run sync
 with app.app_context():
     try:
         # Create tables
-        Base.metadata.create_all(db.engine)
+        db.create_all()
         logger.info("Database tables created successfully")
         
         # Create admin user if it doesn't exist
