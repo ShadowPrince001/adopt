@@ -45,15 +45,11 @@ def sync_databases():
     SQLiteSession = sessionmaker(bind=sqlite_engine)
     sqlite_session = SQLiteSession()
     
-    # Create PostgreSQL engine if DATABASE_URL is set
+    # Get PostgreSQL URL from environment
     postgres_url = os.getenv('DATABASE_URL')
+    
     if not postgres_url:
-        print("\nDATABASE_URL not set. Please set it using:")
-        print("export DATABASE_URL='postgresql://username:password@host:port/database'")
-        print("or on Windows:")
-        print("set DATABASE_URL=postgresql://username:password@host:port/database")
-        print("\nYour current DATABASE_URL should be:")
-        print("postgresql://adoptease_user:vF68HOLthnOVCugVi7hOVZ5BzSKp2GvQ@dpg-d040cb7gi27c73b51geg-a/adoptease")
+        print("\nDATABASE_URL not found in environment variables.")
         return
     
     # Convert postgres:// to postgresql:// if needed
@@ -82,34 +78,97 @@ def sync_databases():
         postgres_users = postgres_session.query(User).count()
         postgres_dogs = postgres_session.query(Dog).count()
         
-        print(f"\nSQLite counts - Users: {sqlite_users}, Dogs: {sqlite_dogs}")
-        print(f"PostgreSQL counts - Users: {postgres_users}, Dogs: {postgres_dogs}")
+        print(f"\nInitial counts:")
+        print(f"SQLite - Users: {sqlite_users}, Dogs: {sqlite_dogs}")
+        print(f"PostgreSQL - Users: {postgres_users}, Dogs: {postgres_dogs}")
         
-        # Sync from SQLite to PostgreSQL if PostgreSQL is empty
-        if postgres_users == 0 and sqlite_users > 0:
-            print("\nSyncing users from SQLite to PostgreSQL...")
-            users = sqlite_session.query(User).all()
-            for user in users:
-                postgres_session.merge(user)
-            postgres_session.commit()
-            print(f"Synced {len(users)} users")
+        # Sync users with conflict resolution
+        print("\nSyncing users...")
+        sqlite_users_list = sqlite_session.query(User).all()
+        postgres_users_list = postgres_session.query(User).all()
         
-        if postgres_dogs == 0 and sqlite_dogs > 0:
-            print("\nSyncing dogs from SQLite to PostgreSQL...")
-            dogs = sqlite_session.query(Dog).all()
-            for dog in dogs:
-                postgres_session.merge(dog)
-            postgres_session.commit()
-            print(f"Synced {len(dogs)} dogs")
+        # Create a map of users by email for quick lookup
+        postgres_users_map = {user.email: user for user in postgres_users_list}
+        sqlite_users_map = {user.email: user for user in sqlite_users_list}
+        
+        # Sync from SQLite to PostgreSQL
+        for email, sqlite_user in sqlite_users_map.items():
+            if email not in postgres_users_map:
+                print(f"Adding new user to PostgreSQL: {email}")
+                postgres_session.merge(sqlite_user)
+            else:
+                # Compare timestamps and update if SQLite is newer
+                postgres_user = postgres_users_map[email]
+                if sqlite_user.created_at > postgres_user.created_at:
+                    print(f"Updating user in PostgreSQL (SQLite has newer data): {email}")
+                    postgres_session.merge(sqlite_user)
+        
+        # Sync from PostgreSQL to SQLite
+        for email, postgres_user in postgres_users_map.items():
+            if email not in sqlite_users_map:
+                print(f"Adding new user to SQLite: {email}")
+                sqlite_session.merge(postgres_user)
+            else:
+                # Always use PostgreSQL data in case of conflict
+                sqlite_user = sqlite_users_map[email]
+                if postgres_user.created_at >= sqlite_user.created_at:
+                    print(f"Updating user in SQLite (PostgreSQL has newer/equal data): {email}")
+                    sqlite_session.merge(postgres_user)
+        
+        # Sync dogs with conflict resolution
+        print("\nSyncing dogs...")
+        sqlite_dogs_list = sqlite_session.query(Dog).all()
+        postgres_dogs_list = postgres_session.query(Dog).all()
+        
+        # Create a map of dogs by unique identifier (name + breed + age)
+        def get_dog_key(dog):
+            return f"{dog.name}_{dog.breed}_{dog.age}"
+        
+        postgres_dogs_map = {get_dog_key(dog): dog for dog in postgres_dogs_list}
+        sqlite_dogs_map = {get_dog_key(dog): dog for dog in sqlite_dogs_list}
+        
+        # Sync from SQLite to PostgreSQL
+        for dog_key, sqlite_dog in sqlite_dogs_map.items():
+            if dog_key not in postgres_dogs_map:
+                print(f"Adding new dog to PostgreSQL: {sqlite_dog.name}")
+                postgres_session.merge(sqlite_dog)
+            else:
+                # Compare timestamps and update if SQLite is newer
+                postgres_dog = postgres_dogs_map[dog_key]
+                if sqlite_dog.created_at > postgres_dog.created_at:
+                    print(f"Updating dog in PostgreSQL (SQLite has newer data): {sqlite_dog.name}")
+                    postgres_session.merge(sqlite_dog)
+        
+        # Sync from PostgreSQL to SQLite
+        for dog_key, postgres_dog in postgres_dogs_map.items():
+            if dog_key not in sqlite_dogs_map:
+                print(f"Adding new dog to SQLite: {postgres_dog.name}")
+                sqlite_session.merge(postgres_dog)
+            else:
+                # Always use PostgreSQL data in case of conflict
+                sqlite_dog = sqlite_dogs_map[dog_key]
+                if postgres_dog.created_at >= sqlite_dog.created_at:
+                    print(f"Updating dog in SQLite (PostgreSQL has newer/equal data): {postgres_dog.name}")
+                    sqlite_session.merge(postgres_dog)
+        
+        # Commit all changes
+        postgres_session.commit()
+        sqlite_session.commit()
         
         # Verify final counts
+        final_sqlite_users = sqlite_session.query(User).count()
+        final_sqlite_dogs = sqlite_session.query(Dog).count()
         final_postgres_users = postgres_session.query(User).count()
         final_postgres_dogs = postgres_session.query(Dog).count()
-        print(f"\nFinal PostgreSQL counts - Users: {final_postgres_users}, Dogs: {final_postgres_dogs}")
+        
+        print(f"\nFinal counts:")
+        print(f"SQLite - Users: {final_sqlite_users}, Dogs: {final_sqlite_dogs}")
+        print(f"PostgreSQL - Users: {final_postgres_users}, Dogs: {final_postgres_dogs}")
         
     except Exception as e:
         print(f"Error during synchronization: {str(e)}")
         postgres_session.rollback()
+        sqlite_session.rollback()
     finally:
         postgres_session.close()
         sqlite_session.close()
