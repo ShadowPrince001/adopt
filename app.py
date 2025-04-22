@@ -58,13 +58,30 @@ with app.app_context():
         # Run sync
         from sync_databases import sync_databases
         logger.info("Starting database synchronization...")
-        sync_databases()
-        logger.info("Database synchronization completed successfully")
+        try:
+            sync_databases()
+            logger.info("Database synchronization completed successfully")
+        except Exception as e:
+            logger.error(f"Error during sync: {str(e)}")
+            # Try one more time after a short delay
+            import time
+            time.sleep(2)
+            logger.info("Retrying database synchronization...")
+            sync_databases()
+            logger.info("Database synchronization completed successfully on retry")
         
         # Verify data after sync
         user_count = User.query.count()
         dog_count = Dog.query.count()
         logger.info(f"Database contains {user_count} users and {dog_count} dogs after sync")
+        
+        # If no dogs found, try to sync again
+        if dog_count == 0:
+            logger.warning("No dogs found in database, attempting additional sync...")
+            sync_databases()
+            user_count = User.query.count()
+            dog_count = Dog.query.count()
+            logger.info(f"After additional sync: {user_count} users and {dog_count} dogs")
     except Exception as e:
         logger.error(f"Error during database initialization: {str(e)}")
         # Continue with application startup even if sync fails
