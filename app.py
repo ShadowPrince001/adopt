@@ -57,8 +57,14 @@ with app.app_context():
         
         # Run sync
         from sync_databases import sync_databases
+        logger.info("Starting database synchronization...")
         sync_databases()
         logger.info("Database synchronization completed successfully")
+        
+        # Verify data after sync
+        user_count = User.query.count()
+        dog_count = Dog.query.count()
+        logger.info(f"Database contains {user_count} users and {dog_count} dogs after sync")
     except Exception as e:
         logger.error(f"Error during database initialization: {str(e)}")
         # Continue with application startup even if sync fails

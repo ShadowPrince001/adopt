@@ -59,6 +59,91 @@ def sync_databases():
         User.__table__.create(bind=postgres_engine, checkfirst=True)
         Dog.__table__.create(bind=postgres_engine, checkfirst=True)
 
+        # Get record counts from both databases
+        sqlite_user_count = sqlite_session.query(User).count()
+        sqlite_dog_count = sqlite_session.query(Dog).count()
+        postgres_user_count = postgres_session.query(User).count()
+        postgres_dog_count = postgres_session.query(Dog).count()
+
+        print(f"SQLite: {sqlite_user_count} users, {sqlite_dog_count} dogs")
+        print(f"PostgreSQL: {postgres_user_count} users, {postgres_dog_count} dogs")
+
+        # If SQLite has data and PostgreSQL is empty, sync from SQLite to PostgreSQL
+        if sqlite_user_count > 0 and postgres_user_count == 0:
+            print("PostgreSQL users table is empty, syncing from SQLite...")
+            users = sqlite_session.query(User).all()
+            for user in users:
+                new_user = User(
+                    name=user.name,
+                    email=user.email,
+                    password=user.password,
+                    type=user.type,
+                    created_at=user.created_at
+                )
+                postgres_session.add(new_user)
+            postgres_session.commit()
+            print(f"Synced {len(users)} users from SQLite to PostgreSQL")
+
+        if sqlite_dog_count > 0 and postgres_dog_count == 0:
+            print("PostgreSQL dogs table is empty, syncing from SQLite...")
+            dogs = sqlite_session.query(Dog).all()
+            for dog in dogs:
+                new_dog = Dog(
+                    name=dog.name,
+                    breed=dog.breed,
+                    age=dog.age,
+                    color=dog.color,
+                    height=dog.height,
+                    weight=dog.weight,
+                    gender=dog.gender,
+                    vaccines=dog.vaccines,
+                    diseases=dog.diseases,
+                    medical_history=dog.medical_history,
+                    personality=dog.personality,
+                    created_at=dog.created_at
+                )
+                postgres_session.add(new_dog)
+            postgres_session.commit()
+            print(f"Synced {len(dogs)} dogs from SQLite to PostgreSQL")
+
+        # If PostgreSQL has data and SQLite is empty, sync from PostgreSQL to SQLite
+        if postgres_user_count > 0 and sqlite_user_count == 0:
+            print("SQLite users table is empty, syncing from PostgreSQL...")
+            users = postgres_session.query(User).all()
+            for user in users:
+                new_user = User(
+                    name=user.name,
+                    email=user.email,
+                    password=user.password,
+                    type=user.type,
+                    created_at=user.created_at
+                )
+                sqlite_session.add(new_user)
+            sqlite_session.commit()
+            print(f"Synced {len(users)} users from PostgreSQL to SQLite")
+
+        if postgres_dog_count > 0 and sqlite_dog_count == 0:
+            print("SQLite dogs table is empty, syncing from PostgreSQL...")
+            dogs = postgres_session.query(Dog).all()
+            for dog in dogs:
+                new_dog = Dog(
+                    name=dog.name,
+                    breed=dog.breed,
+                    age=dog.age,
+                    color=dog.color,
+                    height=dog.height,
+                    weight=dog.weight,
+                    gender=dog.gender,
+                    vaccines=dog.vaccines,
+                    diseases=dog.diseases,
+                    medical_history=dog.medical_history,
+                    personality=dog.personality,
+                    created_at=dog.created_at
+                )
+                sqlite_session.add(new_dog)
+            sqlite_session.commit()
+            print(f"Synced {len(dogs)} dogs from PostgreSQL to SQLite")
+
         # Get latest timestamps from both databases
         sqlite_latest_user = get_latest_timestamp(sqlite_session, User)
         sqlite_latest_dog = get_latest_timestamp(sqlite_session, Dog)
