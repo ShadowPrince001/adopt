@@ -476,6 +476,30 @@ def update_dog_expert(user, dog_id):
         logger.error(f"Error updating dog: {str(e)}")
         return jsonify({"message": "An error occurred while updating the dog"}), 500
 
+@app.route("/api/admin/users/<int:user_id>", methods=["DELETE"])
+@token_required
+@admin_required
+def delete_user(user, user_id):
+    try:
+        # Prevent self-deletion
+        if user.id == user_id:
+            return jsonify({"message": "Cannot delete your own account"}), 400
+
+        user_to_delete = User.query.get(user_id)
+        if not user_to_delete:
+            return jsonify({"message": "User not found"}), 404
+
+        # Delete the user
+        db.session.delete(user_to_delete)
+        db.session.commit()
+        
+        logger.info(f"User deleted: {user_to_delete.email}")
+        return jsonify({"message": "User deleted successfully"})
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f"Error deleting user: {str(e)}")
+        return jsonify({"message": "An error occurred while deleting the user"}), 500
+
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
 
