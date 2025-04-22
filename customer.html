@@ -289,6 +289,14 @@
             </select>
           </div>
           <div class="col-md-3">
+            <label for="genderFilter" class="form-label">Filter by Gender:</label>
+            <select class="form-select" id="genderFilter">
+              <option value="">All Genders</option>
+              <option value="Male">Male</option>
+              <option value="Female">Female</option>
+            </select>
+          </div>
+          <div class="col-md-3">
             <label for="sortBy" class="form-label">Sort by:</label>
             <select class="form-select" id="sortBy">
               <option value="age_desc">Age (Oldest First)</option>
@@ -392,12 +400,14 @@
       function filterAndDisplayDogs() {
         const breed = document.getElementById('breedFilter').value;
         const color = document.getElementById('colorFilter').value;
+        const gender = document.getElementById('genderFilter').value;
         const sortBy = document.getElementById('sortBy').value;
 
         let filteredDogs = dogs.filter(dog => {
           const breedMatch = !breed || dog.breed === breed;
           const colorMatch = !color || (dog.color && dog.color.toLowerCase() === color.toLowerCase());
-          return breedMatch && colorMatch;
+          const genderMatch = !gender || dog.gender === gender;
+          return breedMatch && colorMatch && genderMatch;
         });
 
         filteredDogs.sort((a, b) => {
@@ -495,6 +505,7 @@
       // Event Listeners
       document.getElementById('breedFilter').addEventListener('change', filterAndDisplayDogs);
       document.getElementById('colorFilter').addEventListener('change', filterAndDisplayDogs);
+      document.getElementById('genderFilter').addEventListener('change', filterAndDisplayDogs);
       document.getElementById('sortBy').addEventListener('change', filterAndDisplayDogs);
       document.getElementById('logout-btn').addEventListener('click', () => {
         localStorage.removeItem('authToken');
