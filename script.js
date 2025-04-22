@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
     const loginForm = document.getElementById('loginForm');
-    const loginBtn = document.querySelector('.btn-primary');
+    const loginBtn = document.querySelector('.signup-btn');
 
     // Add loading state to button
     function setLoading(button, isLoading) {

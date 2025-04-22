@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify, send_from_directory
+from flask import Flask, request, jsonify, send_from_directory, render_template, redirect, url_for, session
 import os
 import jwt
 import requests
@@ -8,7 +8,7 @@ from flask_sqlalchemy import SQLAlchemy
 from dotenv import load_dotenv
 import logging
 from functools import wraps
-from sync_databases import User, Dog, db
+from sync_databases import User, Dog, db, sync_databases
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -20,9 +20,11 @@ app.config["SECRET_KEY"] = os.getenv("SECRET_KEY", "default_secret_key_for_devel
 
 # Database configuration
 if os.getenv("DATABASE_URL"):
-    app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("DATABASE_URL").replace("postgres://", "postgresql://")
+    app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("DATABASE_URL").replace("postgres://", "postgresql://", 1)
 else:
-    app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///adoptease.db"
+    # Ensure instance directory exists
+    os.makedirs('instance', exist_ok=True)
+    app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///instance/adoptease.db"
 
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.config["RATE_LIMIT"] = "100 per day"  # Basic rate limiting
@@ -35,57 +37,25 @@ logger.info("Environment variables loaded:")
 logger.info(f"SECRET_KEY: {'Set' if os.getenv('SECRET_KEY') else 'Not set'}")
 logger.info(f"OPENROUTER_API_KEY: {'Set' if os.getenv('OPENROUTER_API_KEY') else 'Not set'}")
 
-# Create tables and run sync
+# Create tables and sync databases
 with app.app_context():
     try:
-        # Create tables
+        # Create tables if they don't exist
         db.create_all()
-        logger.info("Database tables created successfully")
+        logger.info("Database tables created/verified")
         
-        # Create admin user if it doesn't exist
-        admin = User.query.filter_by(type='admin').first()
-        if not admin:
-            admin = User(
-                name='Maheeyan',
-                email='maheeyan@gmail.com',
-                password=generate_password_hash('admin123'),
-                type='admin'
-            )
-            db.session.add(admin)
-            db.session.commit()
-            logger.info("Admin user created successfully")
+        # Sync databases
+        sync_databases()
+        logger.info("Database synchronization completed")
         
-        # Run sync
-        from sync_databases import sync_databases
-        logger.info("Starting database synchronization...")
-        try:
-            sync_databases()
-            logger.info("Database synchronization completed successfully")
-        except Exception as e:
-            logger.error(f"Error during sync: {str(e)}")
-            # Try one more time after a short delay
-            import time
-            time.sleep(2)
-            logger.info("Retrying database synchronization...")
-            sync_databases()
-            logger.info("Database synchronization completed successfully on retry")
-        
-        # Verify data after sync
+        # Verify data
         user_count = User.query.count()
         dog_count = Dog.query.count()
-        logger.info(f"Database contains {user_count} users and {dog_count} dogs after sync")
+        logger.info(f"Database contains {user_count} users and {dog_count} dogs")
         
-        # If no dogs found, try to sync again
-        if dog_count == 0:
-            logger.warning("No dogs found in database, attempting additional sync...")
-            sync_databases()
-            user_count = User.query.count()
-            dog_count = Dog.query.count()
-            logger.info(f"After additional sync: {user_count} users and {dog_count} dogs")
     except Exception as e:
         logger.error(f"Error during database initialization: {str(e)}")
-        # Continue with application startup even if sync fails
-        pass
+        raise
 
 # Error handling middleware
 @app.errorhandler(Exception)

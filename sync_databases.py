@@ -1,5 +1,5 @@
 import os
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, inspect
 from sqlalchemy.orm import sessionmaker
 from datetime import datetime
 from flask_sqlalchemy import SQLAlchemy
@@ -8,16 +8,16 @@ from flask_sqlalchemy import SQLAlchemy
 db = SQLAlchemy()
 
 class User(db.Model):
-    __tablename__ = 'user'
+    __tablename__ = 'user'  # Changed from 'users' to 'user'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
     password = db.Column(db.String(200), nullable=False)
     type = db.Column(db.String(20), nullable=False)  # admin, customer, or expert
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    created_at = db.Column(db.DateTime, nullable=False)
 
 class Dog(db.Model):
-    __tablename__ = 'dog'
+    __tablename__ = 'dog'  # Changed from 'dogs' to 'dog'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
     breed = db.Column(db.String(100), nullable=False)
@@ -30,7 +30,26 @@ class Dog(db.Model):
     diseases = db.Column(db.String(500))
     medical_history = db.Column(db.String(1000))
     personality = db.Column(db.String(500))
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    created_at = db.Column(db.DateTime, nullable=False)
+
+def check_existing_tables(engine):
+    """Check what tables exist in the database"""
+    inspector = inspect(engine)
+    existing_tables = inspector.get_table_names()
+    print(f"\nExisting tables: {existing_tables}")
+    return existing_tables
+
+def create_tables(engine):
+    """Create tables if they don't exist"""
+    existing_tables = check_existing_tables(engine)
+    
+    if 'user' not in existing_tables:  # Updated to match new table name
+        print("Creating user table...")
+        User.__table__.create(bind=engine)
+    
+    if 'dog' not in existing_tables:  # Updated to match new table name
+        print("Creating dog table...")
+        Dog.__table__.create(bind=engine)
 
 def get_latest_timestamp(session, model):
     """Get the latest timestamp from a model's records"""
@@ -42,161 +61,77 @@ def get_latest_timestamp(session, model):
         return datetime.min
 
 def sync_databases():
+    """Synchronize data between SQLite and PostgreSQL databases"""
     print("\n=== Starting Database Synchronization ===")
     
-    # Create both database engines
-    sqlite_engine = create_engine('sqlite:///adoptease.db')
-    
-    # Get PostgreSQL URL from environment or use default SQLite
-    postgres_url = os.getenv('DATABASE_URL')
-    if not postgres_url:
-        print("WARNING: DATABASE_URL not set, using SQLite for both databases")
-        postgres_engine = sqlite_engine
-    else:
-        postgres_engine = create_engine(postgres_url)
-    
-    print("Database engines created")
-    print(f"SQLite URL: sqlite:///adoptease.db")
-    print(f"PostgreSQL URL: {postgres_url or 'sqlite:///adoptease.db'}")
-    
-    # Create sessions
+    # Create SQLite engine
+    sqlite_engine = create_engine('sqlite:///instance/adoptease.db')  # Updated to use instance path
     SQLiteSession = sessionmaker(bind=sqlite_engine)
-    PostgreSQLSession = sessionmaker(bind=postgres_engine)
     sqlite_session = SQLiteSession()
-    postgres_session = PostgreSQLSession()
-
-    try:
-        print("\nCreating tables if they don't exist...")
-        # Create tables in both databases
-        User.__table__.create(bind=sqlite_engine, checkfirst=True)
-        Dog.__table__.create(bind=sqlite_engine, checkfirst=True)
-        User.__table__.create(bind=postgres_engine, checkfirst=True)
-        Dog.__table__.create(bind=postgres_engine, checkfirst=True)
-        print("Tables created/verified")
-
-        # Get record counts from both databases
-        sqlite_user_count = sqlite_session.query(User).count()
-        sqlite_dog_count = sqlite_session.query(Dog).count()
-        postgres_user_count = postgres_session.query(User).count()
-        postgres_dog_count = postgres_session.query(Dog).count()
-
-        print("\nCurrent Database State:")
-        print(f"SQLite: {sqlite_user_count} users, {sqlite_dog_count} dogs")
-        print(f"PostgreSQL: {postgres_user_count} users, {postgres_dog_count} dogs")
-
-        # Debug SQLite database
-        print("\nDebugging SQLite Database:")
+    
+    # Create PostgreSQL engine if DATABASE_URL is set
+    postgres_url = os.getenv('DATABASE_URL')
+    if postgres_url:
+        # Convert postgres:// to postgresql:// if needed
+        if postgres_url.startswith('postgres://'):
+            postgres_url = postgres_url.replace('postgres://', 'postgresql://', 1)
+        postgres_engine = create_engine(postgres_url)
+        PostgreSQLSession = sessionmaker(bind=postgres_engine)
+        postgres_session = PostgreSQLSession()
+        
         try:
-            # Check if SQLite file exists
-            if os.path.exists('adoptease.db'):
-                print("SQLite database file exists")
-                # Get table names
-                table_names = sqlite_engine.execute("SELECT name FROM sqlite_master WHERE type='table';").fetchall()
-                print(f"Tables in SQLite: {[name[0] for name in table_names]}")
-                
-                # Get all users from SQLite
+            # Check if tables exist in PostgreSQL, create if they don't
+            inspector = inspect(postgres_engine)
+            existing_tables = inspector.get_table_names()
+            
+            if 'user' not in existing_tables:
+                print("Creating user table in PostgreSQL...")
+                User.__table__.create(bind=postgres_engine)
+            if 'dog' not in existing_tables:
+                print("Creating dog table in PostgreSQL...")
+                Dog.__table__.create(bind=postgres_engine)
+            
+            # Get counts from both databases
+            sqlite_users = sqlite_session.query(User).count()
+            sqlite_dogs = sqlite_session.query(Dog).count()
+            postgres_users = postgres_session.query(User).count()
+            postgres_dogs = postgres_session.query(Dog).count()
+            
+            print(f"\nSQLite counts - Users: {sqlite_users}, Dogs: {sqlite_dogs}")
+            print(f"PostgreSQL counts - Users: {postgres_users}, Dogs: {postgres_dogs}")
+            
+            # Sync from SQLite to PostgreSQL if PostgreSQL is empty
+            if postgres_users == 0 and sqlite_users > 0:
+                print("\nSyncing users from SQLite to PostgreSQL...")
                 users = sqlite_session.query(User).all()
-                print(f"\nUsers in SQLite:")
                 for user in users:
-                    print(f"- {user.email} ({user.type})")
-                
-                # Get all dogs from SQLite
+                    postgres_session.merge(user)
+                postgres_session.commit()
+                print(f"Synced {len(users)} users")
+            
+            if postgres_dogs == 0 and sqlite_dogs > 0:
+                print("\nSyncing dogs from SQLite to PostgreSQL...")
                 dogs = sqlite_session.query(Dog).all()
-                print(f"\nDogs in SQLite:")
                 for dog in dogs:
-                    print(f"- {dog.name} ({dog.breed})")
-            else:
-                print("WARNING: SQLite database file does not exist!")
+                    postgres_session.merge(dog)
+                postgres_session.commit()
+                print(f"Synced {len(dogs)} dogs")
+            
+            # Verify final counts
+            final_postgres_users = postgres_session.query(User).count()
+            final_postgres_dogs = postgres_session.query(Dog).count()
+            print(f"\nFinal PostgreSQL counts - Users: {final_postgres_users}, Dogs: {final_postgres_dogs}")
+            
         except Exception as e:
-            print(f"Error debugging SQLite: {str(e)}")
-
-        # Sync users from SQLite to PostgreSQL
-        if sqlite_user_count > 0:
-            print("\nSyncing users from SQLite to PostgreSQL...")
-            users = sqlite_session.query(User).all()
-            print(f"Found {len(users)} users in SQLite to sync")
-            for user in users:
-                print(f"Syncing user: {user.email}")
-                try:
-                    # Check if user already exists in PostgreSQL
-                    existing_user = postgres_session.query(User).filter_by(email=user.email).first()
-                    if not existing_user:
-                        new_user = User(
-                            name=user.name,
-                            email=user.email,
-                            password=user.password,
-                            type=user.type,
-                            created_at=user.created_at
-                        )
-                        postgres_session.add(new_user)
-                        postgres_session.commit()
-                        print(f"Successfully synced user: {user.email}")
-                    else:
-                        print(f"User {user.email} already exists in PostgreSQL")
-                except Exception as e:
-                    print(f"Error syncing user {user.email}: {str(e)}")
-                    postgres_session.rollback()
-
-        # Sync dogs from SQLite to PostgreSQL
-        if sqlite_dog_count > 0:
-            print("\nSyncing dogs from SQLite to PostgreSQL...")
-            dogs = sqlite_session.query(Dog).all()
-            print(f"Found {len(dogs)} dogs in SQLite to sync")
-            for dog in dogs:
-                print(f"Syncing dog: {dog.name} ({dog.breed})")
-                try:
-                    # Check if dog already exists in PostgreSQL
-                    existing_dog = postgres_session.query(Dog).filter_by(
-                        name=dog.name,
-                        breed=dog.breed,
-                        age=dog.age
-                    ).first()
-                    if not existing_dog:
-                        new_dog = Dog(
-                            name=dog.name,
-                            breed=dog.breed,
-                            age=dog.age,
-                            color=dog.color,
-                            height=dog.height,
-                            weight=dog.weight,
-                            gender=dog.gender,
-                            vaccines=dog.vaccines,
-                            diseases=dog.diseases,
-                            medical_history=dog.medical_history,
-                            personality=dog.personality,
-                            created_at=dog.created_at
-                        )
-                        postgres_session.add(new_dog)
-                        postgres_session.commit()
-                        print(f"Successfully synced dog: {dog.name}")
-                    else:
-                        print(f"Dog {dog.name} already exists in PostgreSQL")
-                except Exception as e:
-                    print(f"Error syncing dog {dog.name}: {str(e)}")
-                    postgres_session.rollback()
-
-        # Verify the sync
-        print("\nVerifying sync results...")
-        final_sqlite_user_count = sqlite_session.query(User).count()
-        final_sqlite_dog_count = sqlite_session.query(Dog).count()
-        final_postgres_user_count = postgres_session.query(User).count()
-        final_postgres_dog_count = postgres_session.query(Dog).count()
-
-        print("\nFinal Database State:")
-        print(f"SQLite: {final_sqlite_user_count} users, {final_sqlite_dog_count} dogs")
-        print(f"PostgreSQL: {final_postgres_user_count} users, {final_postgres_dog_count} dogs")
-
-        print("\n=== Database Synchronization Completed ===")
-
-    except Exception as e:
-        print(f"\nERROR during synchronization: {str(e)}")
-        postgres_session.rollback()
-        sqlite_session.rollback()
-        raise
-
-    finally:
-        postgres_session.close()
-        sqlite_session.close()
+            print(f"Error during synchronization: {str(e)}")
+            postgres_session.rollback()
+        finally:
+            postgres_session.close()
+    else:
+        print("\nDATABASE_URL not set, skipping PostgreSQL synchronization")
+    
+    sqlite_session.close()
+    print("\n=== Database Synchronization Complete ===")
 
 if __name__ == "__main__":
     sync_databases() 
