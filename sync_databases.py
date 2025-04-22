@@ -46,11 +46,18 @@ def sync_databases():
     
     # Create both database engines
     sqlite_engine = create_engine('sqlite:///adoptease.db')
-    postgres_engine = create_engine(os.getenv('DATABASE_URL'))
+    
+    # Get PostgreSQL URL from environment or use default SQLite
+    postgres_url = os.getenv('DATABASE_URL')
+    if not postgres_url:
+        print("WARNING: DATABASE_URL not set, using SQLite for both databases")
+        postgres_engine = sqlite_engine
+    else:
+        postgres_engine = create_engine(postgres_url)
     
     print("Database engines created")
     print(f"SQLite URL: sqlite:///adoptease.db")
-    print(f"PostgreSQL URL: {os.getenv('DATABASE_URL')}")
+    print(f"PostgreSQL URL: {postgres_url or 'sqlite:///adoptease.db'}")
     
     # Create sessions
     SQLiteSession = sessionmaker(bind=sqlite_engine)
@@ -76,6 +83,32 @@ def sync_databases():
         print("\nCurrent Database State:")
         print(f"SQLite: {sqlite_user_count} users, {sqlite_dog_count} dogs")
         print(f"PostgreSQL: {postgres_user_count} users, {postgres_dog_count} dogs")
+
+        # Debug SQLite database
+        print("\nDebugging SQLite Database:")
+        try:
+            # Check if SQLite file exists
+            if os.path.exists('adoptease.db'):
+                print("SQLite database file exists")
+                # Get table names
+                table_names = sqlite_engine.execute("SELECT name FROM sqlite_master WHERE type='table';").fetchall()
+                print(f"Tables in SQLite: {[name[0] for name in table_names]}")
+                
+                # Get all users from SQLite
+                users = sqlite_session.query(User).all()
+                print(f"\nUsers in SQLite:")
+                for user in users:
+                    print(f"- {user.email} ({user.type})")
+                
+                # Get all dogs from SQLite
+                dogs = sqlite_session.query(Dog).all()
+                print(f"\nDogs in SQLite:")
+                for dog in dogs:
+                    print(f"- {dog.name} ({dog.breed})")
+            else:
+                print("WARNING: SQLite database file does not exist!")
+        except Exception as e:
+            print(f"Error debugging SQLite: {str(e)}")
 
         # Sync users from SQLite to PostgreSQL
         if sqlite_user_count > 0:
