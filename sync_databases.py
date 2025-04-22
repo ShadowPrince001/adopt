@@ -1,9 +1,11 @@
 import os
+import time
 from sqlalchemy import create_engine, inspect
 from sqlalchemy.orm import sessionmaker
 from datetime import datetime
 from flask_sqlalchemy import SQLAlchemy
 from dotenv import load_dotenv
+import sys
 
 # Load environment variables from .env file
 load_dotenv()
@@ -19,6 +21,7 @@ class User(db.Model):
     password = db.Column(db.String(200), nullable=False)
     type = db.Column(db.String(20), nullable=False)
     created_at = db.Column(db.DateTime, nullable=False)
+    updated_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow)
 
 class Dog(db.Model):
     __tablename__ = 'dog'  # Using singular form to match existing database
@@ -35,10 +38,13 @@ class Dog(db.Model):
     medical_history = db.Column(db.String(1000))
     personality = db.Column(db.String(500))
     created_at = db.Column(db.DateTime, nullable=False)
+    updated_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow)
 
 def sync_databases():
-    """Synchronize data between SQLite and PostgreSQL databases"""
+    """Synchronize data from PostgreSQL to SQLite database"""
     print("\n=== Starting Database Synchronization ===")
+    print("Note: In Render's free tier, SQLite is ephemeral and will be reset on redeployment.")
+    print("This sync ensures SQLite has the latest data from PostgreSQL after each deployment.")
     
     # Create SQLite engine
     sqlite_engine = create_engine('sqlite:///instance/adoptease.db')
@@ -82,92 +88,74 @@ def sync_databases():
         print(f"SQLite - Users: {sqlite_users}, Dogs: {sqlite_dogs}")
         print(f"PostgreSQL - Users: {postgres_users}, Dogs: {postgres_dogs}")
         
-        # Sync users with conflict resolution
-        print("\nSyncing users...")
-        sqlite_users_list = sqlite_session.query(User).all()
+        # Track changes
+        users_added = 0
+        users_updated = 0
+        dogs_added = 0
+        dogs_updated = 0
+        
+        # Sync users from PostgreSQL to SQLite
+        print("\n=== Syncing users from PostgreSQL to SQLite ===")
         postgres_users_list = postgres_session.query(User).all()
+        sqlite_users_map = {user.email: user for user in sqlite_session.query(User).all()}
         
-        # Create a map of users by email for quick lookup
-        postgres_users_map = {user.email: user for user in postgres_users_list}
-        sqlite_users_map = {user.email: user for user in sqlite_users_list}
-        
-        # Sync from SQLite to PostgreSQL
-        for email, sqlite_user in sqlite_users_map.items():
-            if email not in postgres_users_map:
-                print(f"Adding new user to PostgreSQL: {email}")
-                postgres_session.merge(sqlite_user)
-            else:
-                # Compare timestamps and update if SQLite is newer
-                postgres_user = postgres_users_map[email]
-                if sqlite_user.created_at > postgres_user.created_at:
-                    print(f"Updating user in PostgreSQL (SQLite has newer data): {email}")
-                    postgres_session.merge(sqlite_user)
-        
-        # Sync from PostgreSQL to SQLite
-        for email, postgres_user in postgres_users_map.items():
-            if email not in sqlite_users_map:
-                print(f"Adding new user to SQLite: {email}")
+        for postgres_user in postgres_users_list:
+            if postgres_user.email not in sqlite_users_map:
+                print(f"Adding new user to SQLite: {postgres_user.email}")
                 sqlite_session.merge(postgres_user)
+                users_added += 1
             else:
-                # Always use PostgreSQL data in case of conflict
-                sqlite_user = sqlite_users_map[email]
-                if postgres_user.created_at >= sqlite_user.created_at:
-                    print(f"Updating user in SQLite (PostgreSQL has newer/equal data): {email}")
+                sqlite_user = sqlite_users_map[postgres_user.email]
+                if postgres_user.updated_at > sqlite_user.updated_at:
+                    print(f"Updating user in SQLite: {postgres_user.email}")
                     sqlite_session.merge(postgres_user)
+                    users_updated += 1
         
-        # Sync dogs with conflict resolution
-        print("\nSyncing dogs...")
-        sqlite_dogs_list = sqlite_session.query(Dog).all()
+        # Sync dogs from PostgreSQL to SQLite
+        print("\n=== Syncing dogs from PostgreSQL to SQLite ===")
         postgres_dogs_list = postgres_session.query(Dog).all()
         
-        # Create a map of dogs by unique identifier (name + breed + age)
         def get_dog_key(dog):
             return f"{dog.name}_{dog.breed}_{dog.age}"
         
-        postgres_dogs_map = {get_dog_key(dog): dog for dog in postgres_dogs_list}
-        sqlite_dogs_map = {get_dog_key(dog): dog for dog in sqlite_dogs_list}
+        sqlite_dogs_map = {get_dog_key(dog): dog for dog in sqlite_session.query(Dog).all()}
         
-        # Sync from SQLite to PostgreSQL
-        for dog_key, sqlite_dog in sqlite_dogs_map.items():
-            if dog_key not in postgres_dogs_map:
-                print(f"Adding new dog to PostgreSQL: {sqlite_dog.name}")
-                postgres_session.merge(sqlite_dog)
-            else:
-                # Compare timestamps and update if SQLite is newer
-                postgres_dog = postgres_dogs_map[dog_key]
-                if sqlite_dog.created_at > postgres_dog.created_at:
-                    print(f"Updating dog in PostgreSQL (SQLite has newer data): {sqlite_dog.name}")
-                    postgres_session.merge(sqlite_dog)
-        
-        # Sync from PostgreSQL to SQLite
-        for dog_key, postgres_dog in postgres_dogs_map.items():
+        for postgres_dog in postgres_dogs_list:
+            dog_key = get_dog_key(postgres_dog)
             if dog_key not in sqlite_dogs_map:
                 print(f"Adding new dog to SQLite: {postgres_dog.name}")
                 sqlite_session.merge(postgres_dog)
+                dogs_added += 1
             else:
-                # Always use PostgreSQL data in case of conflict
                 sqlite_dog = sqlite_dogs_map[dog_key]
-                if postgres_dog.created_at >= sqlite_dog.created_at:
-                    print(f"Updating dog in SQLite (PostgreSQL has newer/equal data): {postgres_dog.name}")
+                if postgres_dog.updated_at > sqlite_dog.updated_at:
+                    print(f"Updating dog in SQLite: {postgres_dog.name}")
                     sqlite_session.merge(postgres_dog)
+                    dogs_updated += 1
         
         # Commit all changes
-        postgres_session.commit()
         sqlite_session.commit()
+        
+        # Print sync summary
+        print("\n=== Sync Summary ===")
+        print(f"Users: {users_added} added, {users_updated} updated")
+        print(f"Dogs: {dogs_added} added, {dogs_updated} updated")
         
         # Verify final counts
         final_sqlite_users = sqlite_session.query(User).count()
         final_sqlite_dogs = sqlite_session.query(Dog).count()
-        final_postgres_users = postgres_session.query(User).count()
-        final_postgres_dogs = postgres_session.query(Dog).count()
         
         print(f"\nFinal counts:")
         print(f"SQLite - Users: {final_sqlite_users}, Dogs: {final_sqlite_dogs}")
-        print(f"PostgreSQL - Users: {final_postgres_users}, Dogs: {final_postgres_dogs}")
+        print(f"PostgreSQL - Users: {postgres_users}, Dogs: {postgres_dogs}")
+        
+        if users_added > 0 or users_updated > 0 or dogs_added > 0 or dogs_updated > 0:
+            print("\nSQLite database has been updated with latest data from PostgreSQL.")
+        else:
+            print("\nNo changes needed - SQLite is already in sync with PostgreSQL.")
         
     except Exception as e:
         print(f"Error during synchronization: {str(e)}")
-        postgres_session.rollback()
         sqlite_session.rollback()
     finally:
         postgres_session.close()
@@ -175,5 +163,29 @@ def sync_databases():
     
     print("\n=== Database Synchronization Complete ===")
 
+def run_continuous_sync(interval_seconds=300):  # Default 5 minutes
+    """Run sync continuously at specified intervals"""
+    print(f"Starting continuous sync with {interval_seconds} second interval...")
+    print("This process will keep SQLite in sync with PostgreSQL.")
+    print("In Render's free tier, SQLite is ephemeral and will be reset on redeployment.")
+    print("The sync ensures SQLite has the latest data after each deployment.")
+    
+    while True:
+        try:
+            sync_databases()
+            print(f"\nNext sync in {interval_seconds} seconds...")
+            time.sleep(interval_seconds)
+        except KeyboardInterrupt:
+            print("\nStopping continuous sync...")
+            break
+        except Exception as e:
+            print(f"Error in continuous sync: {str(e)}")
+            print("Retrying in 60 seconds...")
+            time.sleep(60)
+
 if __name__ == "__main__":
-    sync_databases() 
+    # Check if continuous sync is requested
+    if len(sys.argv) > 1 and sys.argv[1] == "--continuous":
+        run_continuous_sync()
+    else:
+        sync_databases() 
