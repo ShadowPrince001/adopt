@@ -21,7 +21,7 @@ class User(db.Model):
     password = db.Column(db.String(200), nullable=False)
     type = db.Column(db.String(20), nullable=False)
     created_at = db.Column(db.DateTime, nullable=False)
-    updated_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, nullable=True)
 
 class Dog(db.Model):
     __tablename__ = 'dog'  # Using singular form to match existing database
@@ -38,7 +38,7 @@ class Dog(db.Model):
     medical_history = db.Column(db.String(1000))
     personality = db.Column(db.String(500))
     created_at = db.Column(db.DateTime, nullable=False)
-    updated_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, nullable=True)
 
 def sync_databases():
     """Synchronize data from PostgreSQL to SQLite database"""
