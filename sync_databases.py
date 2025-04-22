@@ -3,6 +3,10 @@ from sqlalchemy import create_engine, inspect
 from sqlalchemy.orm import sessionmaker
 from datetime import datetime
 from flask_sqlalchemy import SQLAlchemy
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
 
 # Initialize Flask-SQLAlchemy
 db = SQLAlchemy()
