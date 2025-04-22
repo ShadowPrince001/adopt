@@ -49,6 +49,8 @@ def sync_databases():
     postgres_engine = create_engine(os.getenv('DATABASE_URL'))
     
     print("Database engines created")
+    print(f"SQLite URL: sqlite:///adoptease.db")
+    print(f"PostgreSQL URL: {os.getenv('DATABASE_URL')}")
     
     # Create sessions
     SQLiteSession = sessionmaker(bind=sqlite_engine)
@@ -75,47 +77,70 @@ def sync_databases():
         print(f"SQLite: {sqlite_user_count} users, {sqlite_dog_count} dogs")
         print(f"PostgreSQL: {postgres_user_count} users, {postgres_dog_count} dogs")
 
-        # If SQLite has data and PostgreSQL is empty, sync from SQLite to PostgreSQL
-        if sqlite_user_count > 0 and postgres_user_count == 0:
-            print("\nPostgreSQL users table is empty, syncing from SQLite...")
+        # Sync users from SQLite to PostgreSQL
+        if sqlite_user_count > 0:
+            print("\nSyncing users from SQLite to PostgreSQL...")
             users = sqlite_session.query(User).all()
             print(f"Found {len(users)} users in SQLite to sync")
             for user in users:
                 print(f"Syncing user: {user.email}")
-                new_user = User(
-                    name=user.name,
-                    email=user.email,
-                    password=user.password,
-                    type=user.type,
-                    created_at=user.created_at
-                )
-                postgres_session.add(new_user)
-            postgres_session.commit()
-            print(f"Synced {len(users)} users from SQLite to PostgreSQL")
+                try:
+                    # Check if user already exists in PostgreSQL
+                    existing_user = postgres_session.query(User).filter_by(email=user.email).first()
+                    if not existing_user:
+                        new_user = User(
+                            name=user.name,
+                            email=user.email,
+                            password=user.password,
+                            type=user.type,
+                            created_at=user.created_at
+                        )
+                        postgres_session.add(new_user)
+                        postgres_session.commit()
+                        print(f"Successfully synced user: {user.email}")
+                    else:
+                        print(f"User {user.email} already exists in PostgreSQL")
+                except Exception as e:
+                    print(f"Error syncing user {user.email}: {str(e)}")
+                    postgres_session.rollback()
 
-        if sqlite_dog_count > 0 and postgres_dog_count == 0:
-            print("\nPostgreSQL dogs table is empty, syncing from SQLite...")
+        # Sync dogs from SQLite to PostgreSQL
+        if sqlite_dog_count > 0:
+            print("\nSyncing dogs from SQLite to PostgreSQL...")
             dogs = sqlite_session.query(Dog).all()
             print(f"Found {len(dogs)} dogs in SQLite to sync")
             for dog in dogs:
                 print(f"Syncing dog: {dog.name} ({dog.breed})")
-                new_dog = Dog(
-                    name=dog.name,
-                    breed=dog.breed,
-                    age=dog.age,
-                    color=dog.color,
-                    height=dog.height,
-                    weight=dog.weight,
-                    gender=dog.gender,
-                    vaccines=dog.vaccines,
-                    diseases=dog.diseases,
-                    medical_history=dog.medical_history,
-                    personality=dog.personality,
-                    created_at=dog.created_at
-                )
-                postgres_session.add(new_dog)
-            postgres_session.commit()
-            print(f"Synced {len(dogs)} dogs from SQLite to PostgreSQL")
+                try:
+                    # Check if dog already exists in PostgreSQL
+                    existing_dog = postgres_session.query(Dog).filter_by(
+                        name=dog.name,
+                        breed=dog.breed,
+                        age=dog.age
+                    ).first()
+                    if not existing_dog:
+                        new_dog = Dog(
+                            name=dog.name,
+                            breed=dog.breed,
+                            age=dog.age,
+                            color=dog.color,
+                            height=dog.height,
+                            weight=dog.weight,
+                            gender=dog.gender,
+                            vaccines=dog.vaccines,
+                            diseases=dog.diseases,
+                            medical_history=dog.medical_history,
+                            personality=dog.personality,
+                            created_at=dog.created_at
+                        )
+                        postgres_session.add(new_dog)
+                        postgres_session.commit()
+                        print(f"Successfully synced dog: {dog.name}")
+                    else:
+                        print(f"Dog {dog.name} already exists in PostgreSQL")
+                except Exception as e:
+                    print(f"Error syncing dog {dog.name}: {str(e)}")
+                    postgres_session.rollback()
 
         # Verify the sync
         print("\nVerifying sync results...")
@@ -127,32 +152,6 @@ def sync_databases():
         print("\nFinal Database State:")
         print(f"SQLite: {final_sqlite_user_count} users, {final_sqlite_dog_count} dogs")
         print(f"PostgreSQL: {final_postgres_user_count} users, {final_postgres_dog_count} dogs")
-
-        if final_postgres_dog_count == 0 and sqlite_dog_count > 0:
-            print("\nWARNING: Dogs were not synced to PostgreSQL!")
-            print("Attempting manual sync...")
-            dogs = sqlite_session.query(Dog).all()
-            for dog in dogs:
-                try:
-                    new_dog = Dog(
-                        name=dog.name,
-                        breed=dog.breed,
-                        age=dog.age,
-                        color=dog.color,
-                        height=dog.height,
-                        weight=dog.weight,
-                        gender=dog.gender,
-                        vaccines=dog.vaccines,
-                        diseases=dog.diseases,
-                        medical_history=dog.medical_history,
-                        personality=dog.personality,
-                        created_at=dog.created_at
-                    )
-                    postgres_session.add(new_dog)
-                except Exception as e:
-                    print(f"Error syncing dog {dog.name}: {str(e)}")
-            postgres_session.commit()
-            print("Manual sync attempt completed")
 
         print("\n=== Database Synchronization Completed ===")
 
