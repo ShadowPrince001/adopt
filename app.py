@@ -8,6 +8,7 @@ from flask_sqlalchemy import SQLAlchemy
 from dotenv import load_dotenv
 import logging
 from functools import wraps
+from sync_databases import sync_databases
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -32,6 +33,16 @@ logger.info(f"SECRET_KEY: {'Set' if os.getenv('SECRET_KEY') else 'Not set'}")
 logger.info(f"OPENROUTER_API_KEY: {'Set' if os.getenv('OPENROUTER_API_KEY') else 'Not set'}")
 
 db = SQLAlchemy(app)
+
+# Run database synchronization on startup
+with app.app_context():
+    try:
+        sync_databases()
+        logger.info("Database synchronization completed successfully")
+    except Exception as e:
+        logger.error(f"Error during database synchronization: {str(e)}")
+        # Continue with application startup even if sync fails
+        pass
 
 # Error handling middleware
 @app.errorhandler(Exception)
