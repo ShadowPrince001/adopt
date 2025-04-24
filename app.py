@@ -196,7 +196,15 @@ def register():
         db.session.add(new_user)
         db.session.commit()
         logger.info(f"New user registered: {data['email']}")
-        return jsonify({"message": "Registration successful", "type": data['type']})
+
+        expiration = datetime.utcnow() + timedelta(days=1)
+        token = jwt.encode(
+            {"email": new_user.email, "name": new_user.name, "exp": expiration, "role": new_user.type},
+            app.config["SECRET_KEY"],
+            algorithm="HS256"
+        )
+
+        return jsonify({"message": "Registration successful", "type": data['type'],"token":token})
     except Exception as e:
         db.session.rollback()
         logger.error(f"Registration error: {str(e)}")
