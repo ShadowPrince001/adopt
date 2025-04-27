@@ -340,7 +340,7 @@
       const diseases = document.getElementById('addDiseases').value.trim();
       const medicalHistory = document.getElementById('addMedicalHistory').value.trim();
       const personality = document.getElementById('addPersonality').value.trim();
-      const createdAt = new Date().toISOString();
+      //const createdAt = new Date().toISOString();
       // Step 2: Frontend validation
       if (!name || !breed) {
         alert('Name and breed are required fields');
@@ -377,8 +377,8 @@
         vaccines: vaccines || null,
         diseases: diseases || null,
         medical_history: medicalHistory || null,
-        personality: personality || null,
-        created_at: createdAt
+        personality: personality || null
+        //created_at: createdAt
       };
 
       // Step 4: Send POST request to server

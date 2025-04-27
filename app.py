@@ -259,8 +259,8 @@ def get_admin_dogs(user):
                 "vaccines": dog.vaccines,
                 "diseases": dog.diseases,
                 "medical_history": dog.medical_history,
-                "personality": dog.personality,
-                "created_at": dog.created_at
+                "personality": dog.personality
+                #"created_at": dog.created_at
             }
             for dog in dogs
         ]
@@ -293,7 +293,8 @@ def add_dog(user):
             vaccines=data.get('vaccines', ''),
             diseases=data.get('diseases', ''),
             medical_history=data.get('medical_history', ''),
-            personality=data.get('personality', '')
+            personality=data.get('personality', ''),
+            created_at=datetime.utcnow() 
         )
 
         db.session.add(new_dog)
