@@ -260,7 +260,7 @@ def get_admin_dogs(user):
                 "diseases": dog.diseases,
                 "medical_history": dog.medical_history,
                 "personality": dog.personality
-                #"created_at": dog.created_at
+                "created_at": dog.created_at
             }
             for dog in dogs
         ]
