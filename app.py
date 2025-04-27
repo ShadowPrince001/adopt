@@ -190,7 +190,8 @@ def register():
             email=data['email'],
             password=hashed_password,
             name=data['name'],
-            type=data['type']
+            type=data['type'],
+            created_at=data.get('created_at', datetime.utcnow())
         )
 
         db.session.add(new_user)

@@ -377,7 +377,8 @@
         vaccines: vaccines || null,
         diseases: diseases || null,
         medical_history: medicalHistory || null,
-        personality: personality || null
+        personality: personality || null,
+        created_at: data.get('created_at', datetime.utcnow())
       };
 
       // Step 4: Send POST request to server
