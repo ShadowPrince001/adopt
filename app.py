@@ -37,12 +37,35 @@ logger.info("Environment variables loaded:")
 logger.info(f"SECRET_KEY: {'Set' if os.getenv('SECRET_KEY') else 'Not set'}")
 logger.info(f"OPENROUTER_API_KEY: {'Set' if os.getenv('OPENROUTER_API_KEY') else 'Not set'}")
 
+
+def create_admin():
+    admin = User.query.filter_by(type="admin", email=os.getenv('ADMIN_EMAIL')).first()
+    if admin:
+        logger.info("Admin already exists")
+        return
+    
+    hashed_password = generate_password_hash(os.getenv('ADMIN_PASSWORD'))
+    admin = User(
+            email=os.getenv('ADMIN_EMAIL'),
+            password=hashed_password,
+            name=os.getenv('ADMIN_NAME'),
+            type='admin',
+            created_at=datetime.utcnow()
+    )
+
+    db.session.add(admin)
+    db.session.commit()
+    logger.info("Admin user created successfully")
+
 # Create tables and sync databases
 with app.app_context():
     try:
         # Create tables if they don't exist
         db.create_all()
         logger.info("Database tables created/verified")
+
+        # Create admin user if not exists
+        create_admin()
         
         # Sync databases
         sync_databases()
